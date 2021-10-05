@@ -1,0 +1,24 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  user: postgres
+  password: postgres
+  host: localhost
+
+development:
+  <<: *default
+  database: zpi_development
+
+test:
+  <<: *default
+  database: zpi_test
+
+production:
+  adapter: postgresql
+  encoding: unicode
+  user: <%= ENV['DB_USERNAME'] %>
+  pool: 15
+  password: <%= ENV['DB_PASSWORD'] %>
+  host: <%= ENV['DB_HOST'] %>
+  database: <%= ENV['DB_NAME'] %>
