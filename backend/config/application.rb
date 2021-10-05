@@ -23,6 +23,8 @@ module Backend
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.1
+    config.frontend_url = ENV.fetch("APP_URL", 'http://localhost:3000')
+    config.backend_url = ENV.fetch("APP_URL", 'http://localhost:4000')
 
     # Configuration for the application, engines, and railties goes here.
     #
