@@ -12,7 +12,9 @@ render(
   <React.StrictMode>
       <Provider store={store}>
           <PersistGate loading={"Loading..."} persistor={persistor}>
+            <ConnectedIntlProvider>
 
+            </ConnectedIntlProvider>
           </PersistGate>
       </Provider>,
   </React.StrictMode>,
