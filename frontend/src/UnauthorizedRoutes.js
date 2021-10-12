@@ -1,9 +1,10 @@
 import {Route} from "react-router-dom";
 import React from "react";
 import {matchPath} from "react-router";
+import LoginPage from "./components/login/LoginPage";
 
 export const unAuthorizedRoutes = [
-    // {path: '/login', component: LoginPage},
+    {path: '/login', component: LoginPage},
     // {path: '/logout', component: Logout},
     // {path: '/registration', component: Registration}
 ]
