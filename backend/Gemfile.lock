@@ -60,6 +60,9 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
+    annotate (3.1.1)
+      activerecord (>= 3.2, < 7.0)
+      rake (>= 10.4, < 14.0)
     bcrypt (3.1.16)
     bootsnap (1.9.1)
       msgpack (~> 1.0)
@@ -72,6 +75,8 @@ GEM
       database_cleaner-core (~> 2.0.0)
     database_cleaner-core (2.0.1)
     diff-lcs (1.4.4)
+    doorkeeper (5.5.4)
+      railties (>= 5)
     erubi (1.10.0)
     ffi (1.15.4)
     globalid (0.5.2)
@@ -172,10 +177,12 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  annotate
   bcrypt (~> 3.1.7)
   bootsnap (>= 1.4.4)
   byebug
   database_cleaner-active_record
+  doorkeeper
   jbuilder (~> 2.7)
   listen (~> 3.3)
   pg (~> 1.1)
