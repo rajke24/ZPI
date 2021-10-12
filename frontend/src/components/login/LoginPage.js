@@ -5,6 +5,8 @@ import * as Yup from "yup";
 import {buildMessages} from "../../common/commonMessages";
 import {defineMessages, useIntl} from "react-intl";
 import {addValidation} from "../../common/form/FromSchemaBuilder";
+import {useFormik} from "formik";
+import {useHistory} from "react-router";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -35,33 +37,35 @@ const messages = buildMessages(defineMessages({
 
 const validationSchema = Yup.object().shape({
     email: addValidation({email: true, required: true}),
-    // password: addValidation({required: true}),
+    password: addValidation({required: true}),
 })
 
 const LoginPage = () => {
-    const formik = useDefaultFormik({
-        validationSchema,
-        initialState: {}
-    })
     const {formatMessage} = useIntl();
+    const history = useHistory();
+    const formik  = useDefaultFormik({
+        initialValues: {},
+        validationSchema
+    });
+
     return (
         <div className='login-page'>
             <h2>{formatMessage(messages.welcome)}</h2>
-            <form>
+            <form onClick={e => e.preventDefault()}>
                 {buildFields([
                     {
                         fieldType: 'input',
                         name: 'email',
-                        label: formatMessage(messages.email)
+                        label: messages.email
                     },
-                    // {
-                    //     fieldType: 'password',
-                    //     name: 'password',
-                    //     label: formatMessage(messages.password)
-                    // },
+                    {
+                        fieldType: 'password',
+                        name: 'password',
+                        label: messages.password
+                    },
                 ], formik, validationSchema)}
-                <button>{formatMessage(messages.signIn)}</button>
-                <button>{formatMessage(messages.signUp)}</button>
+                <button type="submit">{formatMessage(messages.signIn)}</button>
+                <button onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
             </form>
         </div>
     );

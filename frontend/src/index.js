@@ -28,7 +28,7 @@ render(
                     </Router>
                 </ConnectedIntlProvider>
             </PersistGate>
-        </Provider>,
+        </Provider>
     </React.StrictMode>,
     document.getElementById('root')
 );

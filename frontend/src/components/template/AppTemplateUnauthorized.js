@@ -9,9 +9,9 @@ const AppTemplateUnauthorized = ({children}) => {
     const location = useLocation();
     const profile = useSelector(state => state.persistentState.profile);
 
-    // if (!profile && !matchesAnyUnauthorizedRoute(location.pathname)) {
-    //     history.push('/login');
-    // }
+    if (!profile && !matchesAnyUnauthorizedRoute(location.pathname)) {
+        history.push('/login');
+    }
 
     return <>
         {!profile && <div className="unauthorized-template">

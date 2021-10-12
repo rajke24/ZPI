@@ -29,10 +29,8 @@ const formGroup = (WrappedComponent) => {
     return (props) => {
         const {label, formik, validationSchema, name, hidden, width} = props;
         const {formatMessage} = useIntl();
-        const fieldName = label && 'label';
+        const fieldName = label && formatMessage(label)
 
-        formik.setFieldValue('email', '')
-        formik.setFieldValue('password', '')
         const newProps = {
             ...props,
             onChange: defaultOnChange(formik),
