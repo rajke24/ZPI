@@ -2,11 +2,11 @@ import {Route} from "react-router-dom";
 import React from "react";
 import {matchPath} from "react-router";
 import LoginPage from "./components/login/LoginPage";
+import Registration from "./components/registration/Registration";
 
 export const unAuthorizedRoutes = [
     {path: '/login', component: LoginPage},
-    // {path: '/logout', component: Logout},
-    // {path: '/registration', component: Registration}
+    {path: '/registration', component: Registration}
 ]
 export const matchesAnyUnauthorizedRoute = (path) => {
     return unAuthorizedRoutes.some(r => matchPath(path, r.path));

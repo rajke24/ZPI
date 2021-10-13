@@ -1,56 +1,64 @@
 import React from 'react';
-import './LoginPage.scss';
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
 import * as Yup from "yup";
 import {buildMessages} from "../../common/commonMessages";
 import {defineMessages, useIntl} from "react-intl";
 import {addValidation} from "../../common/form/FromSchemaBuilder";
 import {useHistory} from "react-router";
+import {post} from "../../shared/ApiClientBuilder";
 
 const messages = buildMessages(defineMessages({
     email: {
-        id: 'LoginPage.Email.Label',
+        id: 'Registration.Email.Label',
         defaultMessage: 'E-mail'
     },
     password: {
-        id: 'LoginPage.Password.Label',
+        id: 'Registration.Password.Label',
         defaultMessage: 'Password'
     },
-    signIn: {
-        id: 'LoginPage.SignIn.Button',
-        defaultMessage: 'Sign in'
+    confirmPassword: {
+        id: 'Registration.ConfirmPassword.Label',
+        defaultMessage: 'Confirm password'
     },
     signUp: {
-        id: 'LoginPage.SignUp.Button',
+        id: 'Registration.SignUp.Button',
         defaultMessage: 'Sign up'
     },
-    invalidEmailOrPassword: {
-        id: "LoginPage.InvalidEmailOrPassword.Message",
-        defaultMessage: "E-mail or password is invalid."
-    },
     welcome: {
-        id: "LoginPage.InvalidEmailOrPassword.Header",
+        id: "Registration.InvalidEmailOrPassword.Header",
         defaultMessage: 'Welcome in ByeSpy'
     }
 }));
 
 const validationSchema = Yup.object().shape({
-    email: addValidation({email: true, required: true}),
+    email: addValidation({email: true, required: true, unique: '/check_email_uniqueness'}),
     password: addValidation({required: true}),
+    confirmPassword: addValidation({required: true, sameAs: 'password'}),
 })
 
-const LoginPage = () => {
+const Registration = () => {
     const {formatMessage} = useIntl();
     const history = useHistory();
-    const formik  = useDefaultFormik({
+
+    const signUp = () => post('/sign_up', {
+        user: {
+            email: formik.values.email,
+            password: formik.values.password
+        }
+    });
+
+    const formik = useDefaultFormik({
         initialValues: {},
         validationSchema
     });
 
     return (
-        <div className='login-page'>
+        <div className='registration'>
             <h2>{formatMessage(messages.welcome)}</h2>
-            <form onClick={e => e.preventDefault()}>
+            <form onSubmit={e => {
+                e.preventDefault();
+                signUp();
+            }}>
                 {buildFields([
                     {
                         fieldType: 'input',
@@ -62,12 +70,16 @@ const LoginPage = () => {
                         name: 'password',
                         label: messages.password
                     },
+                    {
+                        fieldType: 'password',
+                        name: 'confirm_password',
+                        label: messages.confirmPassword
+                    },
                 ], formik, validationSchema)}
-                <button type="submit">{formatMessage(messages.signIn)}</button>
-                <button onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
+                <button type="submit">{formatMessage(messages.signUp)}</button>
             </form>
         </div>
     );
 };
 
-export default LoginPage;
+export default Registration;

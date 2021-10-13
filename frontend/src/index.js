@@ -10,8 +10,11 @@ import AppTemplateAuthorized from "./components/template/AppTemplateAuthorized";
 import AuthorizedRoutes from "./AuthorizedRoutes";
 import AppTemplateUnauthorized from "./components/template/AppTemplateUnauthorized";
 import UnauthorizedRoutes from "./UnauthorizedRoutes";
+import axios from "axios";
+import appConfig from "./config/applicationConfiguration";
 
 const {persistor, store} = configureStore();
+axios.defaults.baseURL = appConfig.apiUrl
 
 render(
     <React.StrictMode>
