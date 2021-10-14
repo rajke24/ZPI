@@ -1,4 +1,5 @@
 import {LOGOUT} from "../components/template/AppTemplateActions";
+import {LOGIN} from "../components/login/LoginPageActions";
 
 const initialState = {
     access_token: null,
@@ -11,6 +12,11 @@ export default (state = initialState, action) => {
     switch (action.type) {
         case LOGOUT:
             return {...initialState}
+        case LOGIN:
+            return {
+                ...state,
+                ...action.tokens
+            }
         default:
             return state
     }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './LoginPage.scss';
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
 import * as Yup from "yup";
@@ -6,6 +6,8 @@ import {buildMessages} from "../../common/commonMessages";
 import {defineMessages, useIntl} from "react-intl";
 import {addValidation} from "../../common/form/FromSchemaBuilder";
 import {useHistory} from "react-router";
+import {login} from "./LoginPageActions";
+import {useDispatch} from "react-redux";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -42,15 +44,29 @@ const validationSchema = Yup.object().shape({
 const LoginPage = () => {
     const {formatMessage} = useIntl();
     const history = useHistory();
-    const formik  = useDefaultFormik({
+    const dispatch = useDispatch();
+    const [error, setError] = useState(null);
+    const actions = {login: login(dispatch)};
+
+    const formik = useDefaultFormik({
         initialValues: {},
         validationSchema
     });
 
+    const save = (e) => {
+        e.preventDefault()
+        setError(null);
+        const {email, password} = formik.values;
+        actions.login(email, password, () => {
+            setError(formatMessage(messages.invalidEmailOrPassword))
+            formik.setSubmitting(false);
+        })
+    };
+
     return (
         <div className='login-page'>
             <h2>{formatMessage(messages.welcome)}</h2>
-            <form onClick={e => e.preventDefault()}>
+            <form onSubmit={e => save(e)}>
                 {buildFields([
                     {
                         fieldType: 'input',
@@ -63,6 +79,7 @@ const LoginPage = () => {
                         label: messages.password
                     },
                 ], formik, validationSchema)}
+                {error && <span className='text-error'>{error}</span>}
                 <button type="submit">{formatMessage(messages.signIn)}</button>
                 <button onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
             </form>
