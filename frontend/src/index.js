@@ -12,7 +12,7 @@ import AppTemplateUnauthorized from "./components/template/AppTemplateUnauthoriz
 import UnauthorizedRoutes from "./UnauthorizedRoutes";
 import AxiosSetup from "./components/template/AxiosSetup";
 
-const {persistor, store} = configureStore();
+export const {persistor, store} = configureStore();
 
 render(
     <React.StrictMode>
