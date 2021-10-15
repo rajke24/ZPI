@@ -10,17 +10,16 @@ import AppTemplateAuthorized from "./components/template/AppTemplateAuthorized";
 import AuthorizedRoutes from "./AuthorizedRoutes";
 import AppTemplateUnauthorized from "./components/template/AppTemplateUnauthorized";
 import UnauthorizedRoutes from "./UnauthorizedRoutes";
-import axios from "axios";
-import appConfig from "./config/applicationConfiguration";
+import AxiosSetup from "./components/template/AxiosSetup";
 
 const {persistor, store} = configureStore();
-axios.defaults.baseURL = appConfig.apiUrl
 
 render(
     <React.StrictMode>
         <Provider store={store}>
             <PersistGate loading={"Loading..."} persistor={persistor}>
                 <ConnectedIntlProvider>
+                    <AxiosSetup/>
                     <Router history={history}>
                         <AppTemplateAuthorized>
                             <AuthorizedRoutes/>
