@@ -40,12 +40,12 @@ const Registration = () => {
     const {formatMessage} = useIntl();
     const history = useHistory();
 
-    const signUp = () => post('/sign_up', {
+    const signUp = (callback) => post('/sign_up', {
         user: {
             email: formik.values.email,
             password: formik.values.password
         }
-    });
+    }, callback);
 
     const formik = useDefaultFormik({
         initialValues: {},
@@ -57,7 +57,7 @@ const Registration = () => {
             <h2>{formatMessage(messages.welcome)}</h2>
             <form onSubmit={e => {
                 e.preventDefault();
-                signUp();
+                signUp(() => history.push('/login'));
             }}>
                 {buildFields([
                     {
