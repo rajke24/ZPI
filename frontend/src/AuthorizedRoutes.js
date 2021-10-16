@@ -2,15 +2,16 @@ import {Route} from "react-router-dom";
 import {matchPath} from "react-router";
 
 export const authorizedRoutes = [
-    // {path: '/path, component: Component, roles: [...roles},
+    // {path: '/contacts', component: Contacts},
+    // {path: '/profile', component: Profile},
 ]
 
-export const matchesAnyAuthorizedRoute = (profile, path) => {
+export const matchesAnyAuthorizedRoute = (path) => {
     return authorizedRoutes.some(r => matchPath(path, r.path));
 }
 
 export const defaultRoute = () => {
-    // return default route
+    return '/contacts'
 };
 
 const AuthorizedRoutes = () => {
