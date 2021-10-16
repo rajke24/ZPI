@@ -1,8 +1,12 @@
 class SignUpController < ApplicationController
-  before_action :doorkeeper_authorize!, except: [:sign_up]
+  before_action :doorkeeper_authorize!, except: [:sign_up, :check_email_uniqueness, :activate_account]
 
   def sign_up
     User.create!(user_params)
+  end
+
+  def activate_account
+    User.find_by(activation_token: params[:activation_token]).update!(activated: true)
   end
 
   def check_email_uniqueness

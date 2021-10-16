@@ -1,13 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './LoginPage.scss';
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
 import * as Yup from "yup";
 import {buildMessages} from "../../common/commonMessages";
 import {defineMessages, useIntl} from "react-intl";
 import {addValidation} from "../../common/form/FromSchemaBuilder";
-import {useHistory} from "react-router";
+import {useHistory, useParams} from "react-router";
 import {login} from "./LoginPageActions";
 import {useDispatch} from "react-redux";
+import {save} from "../../shared/ApiClientBuilder";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -45,15 +46,28 @@ const LoginPage = () => {
     const {formatMessage} = useIntl();
     const history = useHistory();
     const dispatch = useDispatch();
+    const params = useParams();
     const [error, setError] = useState(null);
-    const actions = {login: login(dispatch)};
+    const [accountActivated, setAccountActivated] = useState(false);
+    const activationToken = params.activation_token
+
+    const actions = {
+        login: login(dispatch),
+        activateAccount: (callback) => save('/activate_account', "PUT", {activation_token: activationToken}, callback)
+    };
 
     const formik = useDefaultFormik({
         initialValues: {},
         validationSchema
     });
 
-    const save = (e) => {
+    useEffect(() => {
+        if (activationToken) actions.activateAccount(() => {
+            setAccountActivated(true)
+        })
+    }, [activationToken])
+
+    const saveUser = (e) => {
         e.preventDefault()
         setError(null);
         const {email, password} = formik.values;
@@ -66,7 +80,8 @@ const LoginPage = () => {
     return (
         <div className='login-page'>
             <h2>{formatMessage(messages.welcome)}</h2>
-            <form onSubmit={e => save(e)}>
+            {accountActivated && <span>Account has been activated successfully</span>}
+            <form onSubmit={e => saveUser(e)}>
                 {buildFields([
                     {
                         fieldType: 'input',

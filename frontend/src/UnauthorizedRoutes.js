@@ -5,7 +5,7 @@ import LoginPage from "./components/login/LoginPage";
 import Registration from "./components/registration/Registration";
 
 export const unAuthorizedRoutes = [
-    {path: '/login', component: LoginPage},
+    {path: '/login/:activation_token?', component: LoginPage},
     {path: '/registration', component: Registration}
 ]
 export const matchesAnyUnauthorizedRoute = (path) => {

@@ -17,6 +17,7 @@ Rails.application.routes.draw do
 
     #  sign_up controller routes (te po prostu są tak proste że nawet nie wiem czy da się inaczej)
     post 'sign_up', to: 'sign_up#sign_up'
+    put 'activate_account', to: 'sign_up#activate_account'
     get 'check_email_uniqueness', to: 'sign_up#check_email_uniqueness'
   end
 end
