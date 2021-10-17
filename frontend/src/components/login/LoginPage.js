@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import './LoginPage.scss';
+import '../../styles/AuthPages.scss';
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
 import * as Yup from "yup";
 import {buildMessages} from "../../common/commonMessages";
@@ -9,6 +9,9 @@ import {useHistory, useParams} from "react-router";
 import {login} from "./LoginPageActions";
 import {useDispatch} from "react-redux";
 import {save} from "../../shared/ApiClientBuilder";
+import logo from '../../common/images/logo.svg';
+import {Link} from "react-router-dom";
+import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -31,10 +34,14 @@ const messages = buildMessages(defineMessages({
         id: "LoginPage.InvalidEmailOrPassword.Message",
         defaultMessage: "E-mail or password is invalid."
     },
-    welcome: {
-        id: "LoginPage.InvalidEmailOrPassword.Header",
-        defaultMessage: 'Welcome in ByeSpy'
-    }
+    appName: {
+        id: "LoginPage.AppName.Header",
+        defaultMessage: 'ByeSpy'
+    },
+    forgotPassword: {
+        id: "LoginPage.ForgotPassword.Link",
+        defaultMessage: 'FORGOT PASSWORD ?'
+    },
 }));
 
 const validationSchema = Yup.object().shape({
@@ -78,26 +85,32 @@ const LoginPage = () => {
     };
 
     return (
-        <div className='login-page'>
-            <h2>{formatMessage(messages.welcome)}</h2>
-            {accountActivated && <span>Account has been activated successfully</span>}
-            <form onSubmit={e => saveUser(e)}>
-                {buildFields([
-                    {
-                        fieldType: 'input',
-                        name: 'email',
-                        label: messages.email
-                    },
-                    {
-                        fieldType: 'password',
-                        name: 'password',
-                        label: messages.password
-                    },
-                ], formik, validationSchema)}
+        <div className='auth-page'>
+            <div className='auth-panel'>
+                <img src={logo} alt={formatMessage(messages.appName)}/>
+                <h1 className='app-name'>{formatMessage(messages.appName)}</h1>
+                {accountActivated && <span>Account has been activated successfully</span>}
                 {error && <span className='text-error'>{error}</span>}
-                <button type="submit">{formatMessage(messages.signIn)}</button>
-                <button onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
-            </form>
+                <form className='auth-form' onSubmit={e => saveUser(e)}>
+                    {buildFields([
+                        {
+                            fieldType: 'input',
+                            name: 'email',
+                            placeholder: formatMessage(messages.email),
+                            icon: <Icon icon={mailIcon}/>
+                        },
+                        {
+                            fieldType: 'password',
+                            name: 'password',
+                            placeholder: formatMessage(messages.password),
+                            icon: <Icon icon={lockIcon}/>
+                        },
+                    ], formik, validationSchema)}
+                    <Link className='forgot-password-link' to='/forgot_password'>{formatMessage(messages.forgotPassword)}</Link>
+                    <button className='auth-general-btn' type="submit">{formatMessage(messages.signIn)}</button>
+                    <button className='auth-side-btn' onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
+                </form>
+            </div>
         </div>
     );
 };

@@ -6,6 +6,8 @@ import {defineMessages, useIntl} from "react-intl";
 import {addValidation} from "../../common/form/FromSchemaBuilder";
 import {useHistory} from "react-router";
 import {post} from "../../shared/ApiClientBuilder";
+import '../../styles/AuthPages.scss';
+import logo from "../../common/images/logo.svg";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -24,9 +26,9 @@ const messages = buildMessages(defineMessages({
         id: 'Registration.SignUp.Button',
         defaultMessage: 'Sign up'
     },
-    welcome: {
-        id: "Registration.InvalidEmailOrPassword.Header",
-        defaultMessage: 'Welcome in ByeSpy'
+    appName: {
+        id: "Registration.AppName.Header",
+        defaultMessage: 'ByeSpy'
     }
 }));
 
@@ -53,31 +55,34 @@ const Registration = () => {
     });
 
     return (
-        <div className='registration'>
-            <h2>{formatMessage(messages.welcome)}</h2>
-            <form onSubmit={e => {
-                e.preventDefault();
-                signUp(() => history.push('/login'));
-            }}>
-                {buildFields([
-                    {
-                        fieldType: 'input',
-                        name: 'email',
-                        label: messages.email
-                    },
-                    {
-                        fieldType: 'password',
-                        name: 'password',
-                        label: messages.password
-                    },
-                    {
-                        fieldType: 'password',
-                        name: 'confirm_password',
-                        label: messages.confirmPassword
-                    },
-                ], formik, validationSchema)}
-                <button type="submit">{formatMessage(messages.signUp)}</button>
-            </form>
+        <div className='auth-page'>
+            <div className='auth-panel'>
+                <img src={logo} />
+                <h2 className='app-name'>{formatMessage(messages.appName)}</h2>
+                <form className='auth-form' onSubmit={e => {
+                    e.preventDefault();
+                    signUp(() => history.push('/login'));
+                }}>
+                    {buildFields([
+                        {
+                            fieldType: 'input',
+                            name: 'email',
+                            placeholder: formatMessage(messages.email)
+                        },
+                        {
+                            fieldType: 'password',
+                            name: 'password',
+                            placeholder: formatMessage(messages.password)
+                        },
+                        {
+                            fieldType: 'password',
+                            name: 'confirm_password',
+                            placeholder: formatMessage(messages.confirmPassword)
+                        },
+                    ], formik, validationSchema)}
+                    <button className='auth-general-btn' type="submit">{formatMessage(messages.signUp)}</button>
+                </form>
+            </div>
         </div>
     );
 };

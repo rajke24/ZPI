@@ -27,7 +27,7 @@ export const defaultOnChange = (formik) => async (name, value) => {
 
 const formGroup = (WrappedComponent) => {
     return (props) => {
-        const {label, formik, validationSchema, name, hidden, width} = props;
+        const {label, formik, validationSchema, name, hidden, width, placeholder} = props;
         const {formatMessage} = useIntl();
         const fieldName = label && formatMessage(label)
 
@@ -42,15 +42,15 @@ const formGroup = (WrappedComponent) => {
         if (hidden) {
             return null
         }
-        return <> {label ?
-            <div>
+        return <> {label || placeholder ?
+            <div style={{width: '100%'}}>
                 <div className="label">
-                    <label for={name}>
+                    { label && <label for={name}>
                         {isRequiredField(validationSchema, name) &&
                         <span className="required-star">*</span>
                         }
                         {fieldName}
-                    </label>
+                    </label>}
                 </div>
                 <div>
                     <WrappedComponent {...newProps}/>

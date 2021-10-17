@@ -11,6 +11,7 @@ import AuthorizedRoutes from "./AuthorizedRoutes";
 import AppTemplateUnauthorized from "./components/template/AppTemplateUnauthorized";
 import UnauthorizedRoutes from "./UnauthorizedRoutes";
 import AxiosSetup from "./components/template/AxiosSetup";
+import './styles/app.scss';
 
 export const {persistor, store} = configureStore();
 

@@ -1,0 +1,93 @@
+@import 'variables';
+
+.auth-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+
+  .auth-panel {
+    width: 500px;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    background: $white;
+    border-radius: 30px;
+
+    -webkit-box-shadow: 3px 2px 31px -10px rgba(66, 68, 90, 0.77);
+    -moz-box-shadow: 3px 2px 31px -10px rgba(66, 68, 90, 0.77);
+    box-shadow: 3px 2px 31px -10px rgba(66, 68, 90, 0.77);
+
+    .app-name {
+      font-size: 40px;
+      margin: 10px 0 20px 0;
+      background: linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-form {
+      width: 75%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+
+      input {
+        width: 100%;
+        border: none;
+        padding: 10px 5px;
+        border-bottom: 2px solid $light-grey;
+        margin-bottom: 15px;
+
+        &:focus {
+          border-bottom: 2px solid $semi-light-green;
+        }
+
+        &.filled {
+          border-bottom: 2px solid $semi-light-green;
+        }
+
+        .invalid {
+          border-bottom: 2px solid red;
+        }
+      }
+
+      input[type="password"] {
+        font: small-caption;
+        font-size: 20px;
+        color: $graphite;
+      }
+
+      button {
+        width: 100%;
+        font-weight: 700;
+        padding: 10px 10px;
+
+        &.auth-general-btn {
+          color: $white;
+          font-size: 16px;
+          background: linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+          margin-top: 20px;
+        }
+
+        &.auth-side-btn {
+          margin-top: 15px;
+          background: linear-gradient(90deg, #C1FFE8 19.05%, #E2FFF1 88.72%);
+          border: 2px solid $semi-light-green;
+          color: $green;
+        }
+      }
+
+      .forgot-password-link {
+        margin-left: auto;
+        margin-bottom: 10px;
+        color: $navy-blue;
+        font-size: 10px;
+        font-weight: 700;
+      }
+    }
+  }
+}
