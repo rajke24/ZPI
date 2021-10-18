@@ -10,15 +10,19 @@ import {login} from "./LoginPageActions";
 import {useDispatch} from "react-redux";
 import {save} from "../../shared/ApiClientBuilder";
 import logo from '../../common/images/logo.svg';
-import Icon, {lockIcon} from "../../common/icons/Icon";
+import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
 
 const messages = buildMessages(defineMessages({
     newPassword: {
-        id: 'ForgotPasswordPage.NewPassword.Label',
+        id: 'ForgotPasswordPage.NewPassword.Placeholder',
         defaultMessage: 'New password'
     },
+    email: {
+        id: 'ForgotPasswordPage.Email.Placeholder',
+        defaultMessage: 'E-mail'
+    },
     confirmPassword: {
-        id: 'ForgotPasswordPage.ConfirmPassword.Label',
+        id: 'ForgotPasswordPage.ConfirmPassword.Placeholder',
         defaultMessage: 'Confirm password'
     },
     changePassword: {
@@ -67,6 +71,12 @@ const ForgotPasswordPage = () => {
                 <h1 className='app-name'>{formatMessage(messages.appName)}</h1>
                 <form className='auth-form' >
                     {buildFields([
+                        {
+                            fieldType: 'input',
+                            name: 'email',
+                            placeholder: formatMessage(messages.email),
+                            icon: <Icon icon={mailIcon}/>
+                        },
                         {
                             fieldType: 'password',
                             name: 'password',

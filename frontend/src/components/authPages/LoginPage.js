@@ -15,11 +15,11 @@ import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
 
 const messages = buildMessages(defineMessages({
     email: {
-        id: 'LoginPage.Email.Label',
+        id: 'LoginPage.Email.Placeholder',
         defaultMessage: 'E-mail'
     },
     password: {
-        id: 'LoginPage.Password.Label',
+        id: 'LoginPage.Password.Placeholder',
         defaultMessage: 'Password'
     },
     signIn: {

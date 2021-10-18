@@ -13,15 +13,15 @@ import {Link} from "react-router-dom";
 
 const messages = buildMessages(defineMessages({
     email: {
-        id: 'RegistrationPage.Email.Label',
+        id: 'RegistrationPage.Email.Placeholder',
         defaultMessage: 'E-mail'
     },
     password: {
-        id: 'RegistrationPage.Password.Label',
+        id: 'RegistrationPage.Password.Placeholder',
         defaultMessage: 'Password'
     },
     confirmPassword: {
-        id: 'RegistrationPage.ConfirmPassword.Label',
+        id: 'RegistrationPage.ConfirmPassword.Placeholder',
         defaultMessage: 'Confirm password'
     },
     signUp: {
