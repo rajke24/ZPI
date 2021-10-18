@@ -8,6 +8,7 @@ import {useHistory} from "react-router";
 import {post} from "../../shared/ApiClientBuilder";
 import '../../styles/AuthPages.scss';
 import logo from "../../common/images/logo.svg";
+import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -67,12 +68,14 @@ const Registration = () => {
                         {
                             fieldType: 'input',
                             name: 'email',
-                            placeholder: formatMessage(messages.email)
+                            placeholder: formatMessage(messages.email),
+                            icon: <Icon icon={mailIcon}/>
                         },
                         {
                             fieldType: 'password',
                             name: 'password',
-                            placeholder: formatMessage(messages.password)
+                            placeholder: formatMessage(messages.password),
+                            icon: <Icon icon={lockIcon}/>
                         },
                         {
                             fieldType: 'password',
