@@ -1,5 +1,5 @@
 import {LOGOUT} from "../components/template/AppTemplateActions";
-import {LOGIN} from "../components/login/LoginPageActions";
+import {LOGIN} from "../components/authPages/LoginPageActions";
 
 const initialState = {
     access_token: null,

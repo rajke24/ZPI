@@ -9,6 +9,10 @@ export const commonMessages = defineMessages({
         id: "Navbar.Profile",
         defaultMessage: "Profile"
     },
+    appName: {
+        id: "Common.AppName.Header",
+        defaultMessage: 'ByeSpy'
+    },
 });
 
 export const buildMessages = (messages = {}) => {

@@ -14,7 +14,7 @@ export const login = dispatch => (email, password, errorCallback) => {
             tokens: tokenResponse.data
         });
     }).catch(exception => {
-        if (exception && exception.response.status === 400 && exception.response.data.error === 'invalid_grant') {
+        if (exception && exception.status === 400 && exception.data.error === 'invalid_grant') {
             errorCallback()
         }
     })

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {LOGIN} from "../login/LoginPageActions";
+import {LOGIN} from "../authPages/LoginPageActions";
 import {LOGOUT} from "./AppTemplateActions";
 import appConfig from "../../config/applicationConfiguration";
 import {store} from "../..";

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import '../../styles/AuthPages.scss';
+import './AuthPages.scss';
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
 import * as Yup from "yup";
 import {buildMessages} from "../../common/commonMessages";
@@ -33,10 +33,6 @@ const messages = buildMessages(defineMessages({
     invalidEmailOrPassword: {
         id: "LoginPage.InvalidEmailOrPassword.Message",
         defaultMessage: "E-mail or password is invalid."
-    },
-    appName: {
-        id: "LoginPage.AppName.Header",
-        defaultMessage: 'ByeSpy'
     },
     forgotPassword: {
         id: "LoginPage.ForgotPassword.Link",
@@ -90,7 +86,7 @@ const LoginPage = () => {
                 <img src={logo} alt={formatMessage(messages.appName)}/>
                 <h1 className='app-name'>{formatMessage(messages.appName)}</h1>
                 {accountActivated && <span>Account has been activated successfully</span>}
-                {error && <span className='text-error'>{error}</span>}
+                {error && <div className='error-feedback'>{error}</div>}
                 <form className='auth-form' onSubmit={e => saveUser(e)}>
                     {buildFields([
                         {
@@ -106,9 +102,11 @@ const LoginPage = () => {
                             icon: <Icon icon={lockIcon}/>
                         },
                     ], formik, validationSchema)}
-                    <Link className='forgot-password-link' to='/forgot_password'>{formatMessage(messages.forgotPassword)}</Link>
+                    <Link className='auth-link'
+                          to='/forgot_password'>{formatMessage(messages.forgotPassword)}</Link>
                     <button className='auth-general-btn' type="submit">{formatMessage(messages.signIn)}</button>
-                    <button className='auth-side-btn' onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
+                    <button className='auth-side-btn'
+                            onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
                 </form>
             </div>
         </div>

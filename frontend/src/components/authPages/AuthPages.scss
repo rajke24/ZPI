@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'src/styles/variables';
 
 .auth-page {
   width: 100vw;
@@ -22,13 +22,28 @@
     -moz-box-shadow: 3px 2px 31px -10px rgba(66, 68, 90, 0.77);
     box-shadow: 3px 2px 31px -10px rgba(66, 68, 90, 0.77);
 
+    .error-feedback {
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      border: 3px solid $fuchsia-rose;
+      font-size: 12px;
+      font-weight: 400;
+      border-radius: 6px;
+      background-color: $fuchsia-rose;
+      padding: 5px;
+      color: $white;
+      margin-bottom: 15px;
+    }
+
     img {
       margin-top: 20px;
+      cursor: pointer;
     }
 
     .app-name {
       font-size: 40px;
-      margin: 10px 0 20px 0;
+      margin: 10px 0 15px 0;
       background: linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -86,12 +101,27 @@
         }
       }
 
-      .forgot-password-link {
+      .auth-link {
         margin-left: auto;
         margin-bottom: 10px;
         color: $navy-blue;
         font-size: 10px;
         font-weight: 700;
+      }
+
+      .sign-in-link {
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 15px;
+        color: $graphite;
+
+        a {
+          margin-left: 5px;
+          margin-bottom: 0;
+        }
       }
     }
   }
