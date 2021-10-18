@@ -12,6 +12,8 @@ import {save} from "../../shared/ApiClientBuilder";
 import logo from '../../common/images/logo.svg';
 import {Link} from "react-router-dom";
 import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
+import {doSave} from "../../common/form/FormHelpers";
+import FormFeedback from "../../common/form/FormFeedback";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -68,6 +70,8 @@ const LoginPage = () => {
         validationSchema
     });
 
+    console.log(formik.errors)
+
     useEffect(() => {
         if (activationToken) actions.activateAccount(() => {
             setAccountActivated(true)
@@ -77,11 +81,13 @@ const LoginPage = () => {
 
     const saveUser = (e) => {
         e.preventDefault()
-        setError(null);
-        const {email, password} = formik.values;
-        actions.login(email, password, () => {
-            setError(formatMessage(messages.invalidEmailOrPassword))
-            formik.setSubmitting(false);
+        doSave(formik, (values) => {
+            setError(null);
+            const {email, password} = values;
+            actions.login(email, password, () => {
+                setError(formatMessage(messages.invalidEmailOrPassword))
+                formik.setSubmitting(false);
+            })
         })
     };
 
@@ -90,8 +96,8 @@ const LoginPage = () => {
             <div className='auth-panel'>
                 <img src={logo} alt={formatMessage(messages.appName)}/>
                 <h1 className='app-name'>{formatMessage(messages.appName)}</h1>
-                {accountActivated && <div className='feedback success'>{formatMessage(messages.successfulAccountActivation)}</div>}
-                {error && <div className='feedback error'>{error}</div>}
+                {accountActivated && <FormFeedback success={true} full={true}>{formatMessage(messages.successfulAccountActivation)}</FormFeedback>}
+                {error && <FormFeedback error={true} full={true}>{error}</FormFeedback>}
                 <form className='auth-form' onSubmit={e => saveUser(e)}>
                     {buildFields([
                         {

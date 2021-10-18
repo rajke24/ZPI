@@ -1,6 +1,6 @@
 import React from "react";
 import {useIntl} from "react-intl";
-
+import FormFeedback from "./FormFeedback";
 
 export const isRequiredField = (validationSchema, name) => {
     if (validationSchema) {
@@ -29,7 +29,7 @@ const formGroup = (WrappedComponent) => {
     return (props) => {
         const {label, formik, validationSchema, name, hidden, width, placeholder} = props;
         const {formatMessage} = useIntl();
-        const fieldName = label && formatMessage(label)
+        const fieldName = label ? formatMessage(label) : placeholder ? placeholder : null
 
         const newProps = {
             ...props,
@@ -42,6 +42,7 @@ const formGroup = (WrappedComponent) => {
         if (hidden) {
             return null
         }
+
         return <> {label || placeholder ?
             <div style={{width: '100%'}}>
                 <div className="label">
@@ -53,6 +54,9 @@ const formGroup = (WrappedComponent) => {
                     </label>}
                 </div>
                 <div>
+                    {error && <FormFeedback error={true} full={false}>
+                        {`${fieldName} ${formatMessage(error.message, error.params)}`}
+                    </FormFeedback>}
                     <WrappedComponent {...newProps}/>
                 </div>
             </div>

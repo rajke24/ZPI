@@ -10,6 +10,7 @@ import './AuthPages.scss';
 import logo from "../../common/images/logo.svg";
 import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
 import {Link} from "react-router-dom";
+import {doSave} from "../../common/form/FormHelpers";
 
 const messages = buildMessages(defineMessages({
     email: {
@@ -56,6 +57,17 @@ const RegistrationPage = () => {
         }
     }, callback);
 
+    const registerUser = e => {
+        e.preventDefault()
+
+        doSave(formik, (values) => {
+            signUp(() => {
+                setRegisteredSuccessfully(true)
+                formik.setSubmitting(false);
+            })
+        })
+    }
+
     const formik = useDefaultFormik({
         initialValues: {},
         validationSchema
@@ -64,12 +76,9 @@ const RegistrationPage = () => {
     return (
         <div className='auth-page'>
             <div className='auth-panel'>
-                <img onClick={() => history.push('/login')} src={logo} />
+                <img onClick={() => history.push('/login')} src={logo}/>
                 <h2 className='app-name'>{formatMessage(messages.appName)}</h2>
-                <form className='auth-form' onSubmit={e => {
-                    e.preventDefault();
-                    signUp(() => setRegisteredSuccessfully(true));
-                }}>
+                <form className='auth-form' onSubmit={e => registerUser(e)}>
                     {buildFields([
                         {
                             fieldType: 'input',
@@ -85,14 +94,14 @@ const RegistrationPage = () => {
                         },
                         {
                             fieldType: 'password',
-                            name: 'confirm_password',
+                            name: 'confirmPassword',
                             placeholder: formatMessage(messages.confirmPassword)
                         },
                     ], formik, validationSchema)}
                     <button className='auth-general-btn' type="submit">{formatMessage(messages.signUp)}</button>
                     <div className='sign-in-link'>
                         {formatMessage(messages.alreadyHaveAccount)}
-                        <Link className='auth-link' to='/login' >{formatMessage(messages.signIn)}</Link>
+                        <Link className='auth-link' to='/login'>{formatMessage(messages.signIn)}</Link>
                     </div>
                 </form>
             </div>
