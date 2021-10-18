@@ -38,6 +38,10 @@ const messages = buildMessages(defineMessages({
         id: "LoginPage.ForgotPassword.Link",
         defaultMessage: 'FORGOT PASSWORD ?'
     },
+    successfulAccountActivation: {
+        id: "LoginPage.SuccessfulAccountActivation.Link",
+        defaultMessage: 'Account has been activated successfully'
+    },
 }));
 
 const validationSchema = Yup.object().shape({
@@ -68,6 +72,7 @@ const LoginPage = () => {
         if (activationToken) actions.activateAccount(() => {
             setAccountActivated(true)
         })
+        setTimeout(() => setAccountActivated(false), 3000)
     }, [activationToken])
 
     const saveUser = (e) => {
@@ -85,8 +90,8 @@ const LoginPage = () => {
             <div className='auth-panel'>
                 <img src={logo} alt={formatMessage(messages.appName)}/>
                 <h1 className='app-name'>{formatMessage(messages.appName)}</h1>
-                {accountActivated && <span>Account has been activated successfully</span>}
-                {error && <div className='error-feedback'>{error}</div>}
+                {accountActivated && <div className='feedback success'>{formatMessage(messages.successfulAccountActivation)}</div>}
+                {error && <div className='feedback error'>{error}</div>}
                 <form className='auth-form' onSubmit={e => saveUser(e)}>
                     {buildFields([
                         {

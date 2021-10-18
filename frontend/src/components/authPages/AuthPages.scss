@@ -22,18 +22,27 @@
     -moz-box-shadow: 3px 2px 31px -10px rgba(66, 68, 90, 0.77);
     box-shadow: 3px 2px 31px -10px rgba(66, 68, 90, 0.77);
 
-    .error-feedback {
+    .feedback {
       display: flex;
       justify-content: left;
       align-items: center;
-      border: 3px solid $fuchsia-rose;
       font-size: 12px;
       font-weight: 400;
       border-radius: 6px;
-      background-color: $fuchsia-rose;
       padding: 5px;
       color: $white;
       margin-bottom: 15px;
+      border: 3px solid;
+
+      &.error {
+        border-color: $fuchsia-rose;
+        background-color: $fuchsia-rose;
+      }
+
+      &.success {
+        border-color: $medium-sea-green;
+        background-color: $medium-sea-green;
+      }
     }
 
     img {
