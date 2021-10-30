@@ -8,6 +8,12 @@ namespace :email_templates do
         filename: 'new_user',
         illustration: 'new_user.png',
         variables: [:recipient_name, :link]
+      },
+      {
+        subject: 'Password reset requested',
+        filename: 'password_reset',
+        illustration: 'password_reset.png',
+        variables: [:link]
       }
     ]
 

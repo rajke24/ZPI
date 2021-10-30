@@ -19,5 +19,8 @@ Rails.application.routes.draw do
     post 'sign_up', to: 'sign_up#sign_up'
     put 'activate_account', to: 'sign_up#activate_account'
     get 'check_email_uniqueness', to: 'sign_up#check_email_uniqueness'
+
+    post 'reset_password', to: 'passwords#reset'
+    post 'forgot_password', to: 'passwords#forgot'
   end
 end

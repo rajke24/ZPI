@@ -48,7 +48,7 @@ const messages = buildMessages(defineMessages({
 
 const validationSchema = Yup.object().shape({
     email: addValidation({email: true, required: true}),
-    password: addValidation({required: true}),
+    password: addValidation({required: true, min: 8, max: 255}),
 })
 
 const LoginPage = () => {
@@ -69,9 +69,7 @@ const LoginPage = () => {
         initialValues: {},
         validationSchema
     });
-
-    console.log(formik.errors)
-
+    
     useEffect(() => {
         if (activationToken) actions.activateAccount(() => {
             setAccountActivated(true)
@@ -79,7 +77,7 @@ const LoginPage = () => {
         setTimeout(() => setAccountActivated(false), 3000)
     }, [activationToken])
 
-    const saveUser = (e) => {
+    const loginUser = (e) => {
         e.preventDefault()
         doSave(formik, (values) => {
             setError(null);
@@ -98,7 +96,7 @@ const LoginPage = () => {
                 <h1 className='app-name'>{formatMessage(messages.appName)}</h1>
                 {accountActivated && <FormFeedback success={true} full={true}>{formatMessage(messages.successfulAccountActivation)}</FormFeedback>}
                 {error && <FormFeedback error={true} full={true}>{error}</FormFeedback>}
-                <form className='auth-form' onSubmit={e => saveUser(e)}>
+                <form className='auth-form' onSubmit={e => loginUser(e)}>
                     {buildFields([
                         {
                             fieldType: 'input',
@@ -115,8 +113,8 @@ const LoginPage = () => {
                     ], formik, validationSchema)}
                     <Link className='auth-link'
                           to='/forgot_password'>{formatMessage(messages.forgotPassword)}</Link>
-                    <button className='auth-general-btn' type="submit">{formatMessage(messages.signIn)}</button>
-                    <button className='auth-side-btn'
+                    <button className='primary-btn' type="submit">{formatMessage(messages.signIn)}</button>
+                    <button className='secondary-btn'
                             onClick={() => history.push('/registration')}>{formatMessage(messages.signUp)}</button>
                 </form>
             </div>

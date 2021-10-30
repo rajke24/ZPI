@@ -15,6 +15,20 @@ button {
   border-radius: 6px;
   border: none;
   cursor: pointer;
+
+  &.primary-btn {
+    color: $white;
+    font-size: 16px;
+    background: linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+    margin-top: 20px;
+  }
+
+  &.secondary-btn {
+    margin-top: 15px;
+    background: linear-gradient(90deg, #C1FFE8 19.05%, #E2FFF1 88.72%);
+    border: 2px solid $semi-light-green;
+    color: $green;
+  }
 }
 
 input {
@@ -28,4 +42,24 @@ input {
 
 a {
   text-decoration: none;
+  margin-left: auto;
+  margin-bottom: 10px;
+  color: $navy-blue;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.labeled-link {
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  color: $graphite;
+
+  a {
+    margin-left: 5px;
+    margin-bottom: 0;
+  }
 }

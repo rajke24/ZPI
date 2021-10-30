@@ -41,8 +41,8 @@ const messages = buildMessages(defineMessages({
 
 const validationSchema = Yup.object().shape({
     email: addValidation({email: true, required: true, unique: '/check_email_uniqueness'}),
-    password: addValidation({required: true}),
-    confirmPassword: addValidation({required: true, sameAs: 'password'}),
+    password: addValidation({required: true, min: 8, max: 255}),
+    confirmPassword: addValidation({required: true, min: 8, max: 255, sameAs: 'password'}),
 })
 
 const RegistrationPage = () => {
@@ -98,8 +98,8 @@ const RegistrationPage = () => {
                             placeholder: formatMessage(messages.confirmPassword)
                         },
                     ], formik, validationSchema)}
-                    <button className='auth-general-btn' type="submit">{formatMessage(messages.signUp)}</button>
-                    <div className='sign-in-link'>
+                    <button className='primary-btn' type="submit">{formatMessage(messages.signUp)}</button>
+                    <div className='labeled-link'>
                         {formatMessage(messages.alreadyHaveAccount)}
                         <Link className='auth-link' to='/login'>{formatMessage(messages.signIn)}</Link>
                     </div>

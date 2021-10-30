@@ -2,13 +2,15 @@
 #
 # Table name: users
 #
-#  id               :bigint           not null, primary key
-#  activated        :boolean
-#  activation_token :string
-#  email            :string           not null
-#  password_digest  :string           not null
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
+#  id                     :bigint           not null, primary key
+#  activated              :boolean
+#  activation_token       :string
+#  email                  :string           not null
+#  password_digest        :string           not null
+#  password_reset_sent_at :datetime
+#  password_reset_token   :string
+#  created_at             :datetime         not null
+#  updated_at             :datetime         not null
 #
 class User < ApplicationRecord
   has_secure_password
@@ -39,6 +41,25 @@ class User < ApplicationRecord
         raise Doorkeeper::Errors::InvalidGrantReuse
       end
     end
+  end
+
+  def send_password_reset
+    self.password_reset_token = SecureRandom.urlsafe_base64
+    self.password_reset_sent_at = Time.zone.now
+    save!
+    Mailer.send_password_reset_mail(self.email, {
+      link: "#{Rails.configuration.frontend_url}/reset_password/#{self.password_reset_token}"
+    }).deliver_later
+  end
+
+  def password_token_valid?
+    (self.password_reset_sent_at + 1.hour) > Time.zone.now
+  end
+
+  def reset_password(password)
+    self.password_reset_token = nil
+    self.password = password
+    save!
   end
 
   private
