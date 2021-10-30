@@ -122,10 +122,12 @@ const LoginPage = () => {
         e.preventDefault();
 
         doSave(formik, (values) => {
-            setError(null);
             const {email, password} = values;
             actions.authorizeUserFirstStep({email, password}, (response) => {
-                if (response.user_exists) setPage(2);
+                if (response.user_exists) {
+                    setError(null);
+                    setPage(2);
+                }
                 else setError(formatMessage(messages.invalidEmailOrPassword));
                 formik.setSubmitting(false);
             })

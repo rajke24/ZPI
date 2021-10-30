@@ -50,18 +50,19 @@ const RegistrationPage = () => {
     const history = useHistory();
     const [registeredSuccessfully, setRegisteredSuccessfully] = useState(false);
 
-    const signUp = (callback) => post('/sign_up', {
-        user: {
-            email: formik.values.email,
-            password: formik.values.password
-        }
-    }, callback);
+    const actions = {
+        signUp: (params, callback) => post('/sign_up', params, callback)
+    };
 
     const registerUser = e => {
         e.preventDefault()
 
         doSave(formik, (values) => {
-            signUp(() => {
+            const {email, password} = values;
+            const params = {
+                user: {email, password}
+            }
+            actions.signUp(params, () => {
                 setRegisteredSuccessfully(true)
                 formik.setSubmitting(false);
             })
