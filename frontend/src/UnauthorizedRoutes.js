@@ -2,14 +2,12 @@ import {Route} from "react-router-dom";
 import React from "react";
 import {matchPath} from "react-router";
 import LoginPage from "./components/authPages/LoginPage";
-// import Logout from "./components/authPages/Logout";
 import RegistrationPage from "./components/authPages/RegistrationPage";
 import ForgotPasswordPage from "./components/authPages/ForgotPasswordPage";
 import ResetPasswordPage from "./components/authPages/ResetPasswordPage";
 
 export const unAuthorizedRoutes = [
     {path: '/login/:activation_token?', component: LoginPage},
-    // {path: '/logout', component: Logout},
     {path: '/registration', component: RegistrationPage},
     {path: '/forgot_password', component: ForgotPasswordPage},
     {path: '/reset_password/:password_reset_token', component: ResetPasswordPage},
