@@ -14,6 +14,12 @@ namespace :email_templates do
         filename: 'password_reset',
         illustration: 'password_reset.png',
         variables: [:link]
+      },
+      {
+        subject: 'Verify your device',
+        filename: 'two_factor_auth_code',
+        illustration: 'two_factor_auth_code.png',
+        variables: [:code]
       }
     ]
 

@@ -6,6 +6,7 @@
 #  activated              :boolean
 #  activation_token       :string
 #  email                  :string           not null
+#  otp_secret_key         :string
 #  password_digest        :string           not null
 #  password_reset_sent_at :datetime
 #  password_reset_token   :string
@@ -14,10 +15,12 @@
 #
 class User < ApplicationRecord
   has_secure_password
+  has_one_time_password
+
   before_create :generate_activation_token
   after_create :send_new_user_email
   before_validation :defaults
-  
+
   has_many :access_grants,
            class_name: 'Doorkeeper::AccessGrant',
            foreign_key: :resource_owner_id,
@@ -32,10 +35,20 @@ class User < ApplicationRecord
   validates_uniqueness_of :email, case_sensitive: false
 
   class << self
-    def authenticate(email, password)
+    def authenticate_first_step(email, password)
       user = User.find_by_email(email)
 
       if user&.authenticate(password)
+        user
+      else
+        nil
+      end
+    end
+
+    def authenticate_second_step(email, password, authentication_code)
+      user = User.find_by_email(email)
+
+      if user&.authenticate(password) && user&.authenticate_otp(authentication_code, drift: 60)
         user
       else
         raise Doorkeeper::Errors::InvalidGrantReuse
@@ -62,6 +75,12 @@ class User < ApplicationRecord
     save!
   end
 
+  def send_two_factor_auth_mail
+    Mailer.send_two_factor_auth_mail(email, {
+      code: otp_code
+    }).deliver_later
+  end
+
   private
 
   def send_new_user_email
@@ -72,12 +91,12 @@ class User < ApplicationRecord
       }).deliver_later
     end
   end
-  
+
   def generate_activation_token
     self.activation_token = SecureRandom.urlsafe_base64
     generate_activation_token if User.exists?(activation_token: self.activation_token) && !Rails.env.test?
   end
-  
+
   def defaults
     self.activated ||= false
   end

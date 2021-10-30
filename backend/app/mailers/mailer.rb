@@ -10,6 +10,11 @@ class Mailer < ApplicationMailer
     send_email(email_address, email[:subject], email[:message])
   end
 
+  def send_two_factor_auth_mail(email_address, variables)
+    email = TemplateRenderer.render_email('two_factor_auth_code', variables)
+    send_email(email_address, email[:subject], email[:message])
+  end
+
   def send_email(recipient, subject, body)
     mail(
       to: recipient,

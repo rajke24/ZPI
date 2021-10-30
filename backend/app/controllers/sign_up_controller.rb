@@ -6,7 +6,7 @@ class SignUpController < ApplicationController
   end
 
   def activate_account
-    User.find_by(activation_token: params[:activation_token]).update!(activated: true)
+    User.find_by(activation_token: params[:activation_token]).update!(activated: true, activation_token: nil)
   end
 
   def check_email_uniqueness

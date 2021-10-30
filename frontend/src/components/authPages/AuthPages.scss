@@ -41,6 +41,13 @@
       align-items: center;
       flex-direction: column;
 
+      .two-factor-auth-info {
+        color: $graphite;
+        font-weight: 700;
+        font-size: 12px;
+        margin-bottom: 25px;
+      }
+
       input {
         width: 100%;
         border: none;

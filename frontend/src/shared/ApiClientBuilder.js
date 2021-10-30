@@ -9,7 +9,7 @@ export const get = (url, params, callback) => {
         params
     };
     axios.request(config).then(
-        result => callback(result.data)
+        result => callback && callback(result.data)
     );
 };
 

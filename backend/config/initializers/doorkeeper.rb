@@ -14,7 +14,7 @@ Doorkeeper.configure do
   end
 
   resource_owner_from_credentials do |_routes|
-    User.authenticate(params[:email], params[:password])
+    User.authenticate_second_step(params[:email], params[:password], params[:authentication_code])
   end
 
   access_token_methods :from_bearer_authorization, :from_basic_authorization, :from_access_token_param
