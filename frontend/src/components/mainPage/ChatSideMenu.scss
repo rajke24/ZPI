@@ -1,0 +1,48 @@
+@import 'src/styles/variables';
+
+.side-menu {
+  width: 20%;
+  height: 100vh;
+
+  .side-menu-header  {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    background: $semi-light-green;
+    color: $white;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: lowercase;
+  }
+
+  .side-menu-list {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  &.left {
+    border-bottom-right-radius: 25px;
+    border-top-right-radius: 25px;
+    -webkit-box-shadow: 9px 9px 24px -8px rgba(0,0,0,0.12);
+    -moz-box-shadow: 9px 9px 24px -8px rgba(0,0,0,0.12);
+    box-shadow: 9px 9px 24px -8px rgba(0,0,0,0.12);
+
+    .side-menu-header  {
+      border-top-right-radius: 25px;
+    }
+  }
+
+  &.right {
+    border-bottom-left-radius: 25px;
+    border-top-left-radius: 25px;
+    -webkit-box-shadow: -9px 9px 24px -8px rgba(0,0,0,0.12);
+    -moz-box-shadow: -9px 9px 24px -8px rgba(0,0,0,0.12);
+    box-shadow: -9px 9px 24px -8px rgba(0,0,0,0.12);
+
+    .side-menu-header  {
+      border-top-left-radius: 25px;
+    }
+  }
+}

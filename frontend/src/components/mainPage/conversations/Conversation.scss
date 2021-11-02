@@ -1,0 +1,33 @@
+@import 'src/styles/variables';
+
+.conversation {
+  padding: 10px 20px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  cursor: pointer;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+  &:nth-child(odd) {
+    background: $graphite;
+  }
+
+  .conversation-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+
+    .name {
+      font-weight: 700;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .last-message {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+}

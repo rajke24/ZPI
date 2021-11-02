@@ -1,9 +1,11 @@
 import {Route} from "react-router-dom";
 import {matchPath} from "react-router";
+import MainPage from "./components/mainPage/MainPage";
 
 export const authorizedRoutes = [
     // {path: '/contacts', component: Contacts},
     // {path: '/profile', component: Profile},
+    {path: '/', component: MainPage}
 ]
 
 export const matchesAnyAuthorizedRoute = (path) => {
@@ -11,7 +13,7 @@ export const matchesAnyAuthorizedRoute = (path) => {
 }
 
 export const defaultRoute = () => {
-    return '/contacts'
+    return '/'
 };
 
 const AuthorizedRoutes = () => {

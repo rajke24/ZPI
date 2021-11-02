@@ -1,0 +1,70 @@
+@import 'src/styles/variables';
+
+.chat {
+  width: 55%;
+  height: 100vh;
+  margin-left: auto;
+  margin-right: auto;
+
+  .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    color: $medium-sea-green;
+    font-size: 28px;
+    font-weight: 600;
+    text-transform: lowercase;
+    padding-top: 20px;
+  }
+
+  .messages {
+    height: calc(100vh - 210px);
+    padding: 30px 30px;
+    overflow-y: auto;
+  }
+
+
+  .chat-input {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    height: 35px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 2px solid $semi-light-green;
+    border-radius: 14px;
+    padding-left: 10px;
+
+    input {
+      width: 90%;
+      border: none;
+      font-size: 14px;
+
+      &::placeholder {
+        font-size: 14px;
+        color: $semi-light-green;
+        font-weight: 500;
+      }
+    }
+
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 10%;
+      height: 100%;
+      background: $semi-light-green;
+      color: $white;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 14px;
+
+      .icon {
+        margin-left: 10px;
+      }
+    }
+  }
+}

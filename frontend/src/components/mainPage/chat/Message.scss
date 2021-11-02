@@ -1,0 +1,32 @@
+@import 'src/styles/variables';
+
+.message-wrapper {
+  width: 100%;
+  height: auto;
+  display: flex;
+  padding-bottom: 4px;
+
+  .message {
+    color: $white;
+    padding: 8px;
+    border-radius: 10px;
+    height: auto;
+    max-width: 40%;
+    overflow-wrap: break-word;
+    font-weight: 500;
+  }
+
+  &.received {
+    .message {
+      margin-right: auto;
+      background: $semi-light-green;
+    }
+  }
+
+  &.sent {
+    .message {
+      margin-left: auto;
+      background: $fuchsia-rose;
+    }
+  }
+}

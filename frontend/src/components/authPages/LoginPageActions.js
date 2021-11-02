@@ -1,4 +1,5 @@
 import axios from 'axios/index';
+import {push} from 'react-router-redux';
 
 export const LOGIN = 'LOGIN';
 
@@ -13,6 +14,7 @@ export const login = dispatch => (email, password, authenticationCode, errorCall
             type: LOGIN,
             tokens: tokenResponse.data
         });
+        dispatch(push('/'));
     }).catch(exception => {
         if (exception && exception.status === 400 && exception.data.error === 'invalid_grant') {
             errorCallback()
