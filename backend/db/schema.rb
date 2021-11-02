@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_30_170745) do
+ActiveRecord::Schema.define(version: 2021_11_01_133422) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -67,6 +67,9 @@ ActiveRecord::Schema.define(version: 2021_10_30_170745) do
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
     t.string "otp_secret_key"
+    t.string "identity_key"
+    t.json "prekeys"
+    t.json "signed_prekey"
   end
 
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
