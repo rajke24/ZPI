@@ -14,6 +14,12 @@ Rails.application.routes.draw do
     #   end
     # end
 
+    resource :message do
+      collection do
+        post 'save_message'
+        post 'find_message'
+      end
+    end
 
     #  sign_up controller routes (te po prostu są tak proste że nawet nie wiem czy da się inaczej)
     post 'sign_up', to: 'sign_up#sign_up'

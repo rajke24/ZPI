@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_01_133422) do
+ActiveRecord::Schema.define(version: 2021_11_02_150914) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "messages", force: :cascade do |t|
+    t.bigint "user_from_id", null: false
+    t.bigint "user_to_id", null: false
+    t.text "content", null: false
+    t.string "type", null: false
+    t.datetime "sent_at", null: false
+    t.index ["user_from_id"], name: "index_messages_on_user_from_id"
+    t.index ["user_to_id"], name: "index_messages_on_user_to_id"
+  end
 
   create_table "oauth_access_grants", force: :cascade do |t|
     t.bigint "resource_owner_id", null: false
@@ -72,6 +82,8 @@ ActiveRecord::Schema.define(version: 2021_11_01_133422) do
     t.json "signed_prekey"
   end
 
+  add_foreign_key "messages", "users", column: "user_from_id"
+  add_foreign_key "messages", "users", column: "user_to_id"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"

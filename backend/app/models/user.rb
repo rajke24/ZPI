@@ -34,6 +34,14 @@ class User < ApplicationRecord
            foreign_key: :resource_owner_id,
            dependent: :delete_all # or :destroy if you need callbacks
 
+  has_many :received_messages,
+           foreign_key => "user_to_id",
+           :class_name => "Message"
+
+  has_many :sent_messages,
+           foreign_key => "user_from_id",
+           :class_name => "Message"
+
   validates_presence_of :email, :password_digest
   validates_uniqueness_of :email, case_sensitive: false
 
