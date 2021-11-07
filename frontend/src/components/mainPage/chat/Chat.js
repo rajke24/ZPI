@@ -1,31 +1,39 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './Chat.scss';
-import Avatar from "../../../common/avatar/Avatar";
 import Message from "./Message";
 import Icon, {sendIcon} from "../../../common/icons/Icon";
-import {get, save} from "../../../shared/ApiClientBuilder";
-
-const messages = [
-    {id: 1, type: 'sent', message: 'Cześć'},
-    {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
-    {id: 3, type: 'received', message: 'Siemka'},
-    {id: 3, type: 'received', message: 'Wszystko w porządku'},
-    {id: 3, type: 'sent', message: 'Nie chcesz wyjść na piwo jutro ?'},
-    {id: 1, type: 'sent', message: 'Cześć'},
-    {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
-    {id: 3, type: 'received', message: 'Siemka'},
-]
+import {save} from "../../../shared/ApiClientBuilder";
+import MessagesChannel from '../../../channels/messages_channel'
+import {useSelector} from "react-redux";
 
 const Chat = () => {
-    const [message, setMessage] = useState();
+    const [currentMessage, setCurrentMessage] = useState('');
+    const [messages, setMessages] = useState([]);
+    const profile = useSelector(state => state.persistentState.profile);
+
+    useEffect(() => {
+        MessagesChannel.received = data => {
+            const messages = data.messages.map(message => ({
+                ...message,
+                message_type: message.user_from_id === profile.id ? 'sent' : 'received'
+            }))
+            setMessages(messages);
+        }
+    }, [])
 
     const actions = {
         sendMessage: () => save('message/save_message', 'POST', {
-            content: message,
-            mail_to: 'tabaluga@mm.pl',
+            content: currentMessage,
+            mail_to: profile.email === 'tabaluga@mm.pl' ? 'jarek@mm.pl' : 'tabaluga@mm.pl',
             sent_at: new Date(),
             type: 'type'
-        }),
+        }, () => setCurrentMessage('')),
+    }
+
+    const onEnterPress = (e) => {
+        if (e.key === 'Enter') {
+            actions.sendMessage();
+        }
     }
 
     return (
@@ -35,13 +43,14 @@ const Chat = () => {
                 Conversation 1
             </div>
             <div className='messages'>
-                {messages.map(({type, message}) => <Message type={type} message={message} /> )}
+                {messages.map((message) => <Message message={message}/>)}
             </div>
             <div className='chat-input'>
-                <input onChange={e => setMessage(e.target.value)} placeholder='Type a new message...'/>
+                <input onKeyPress={e => onEnterPress(e)} value={currentMessage}
+                       onChange={e => setCurrentMessage(e.target.value)} placeholder='Type a new message...'/>
                 <button onClick={() => actions.sendMessage()}>
                     Send
-                    <Icon icon={sendIcon} />
+                    <Icon icon={sendIcon}/>
                 </button>
             </div>
         </div>

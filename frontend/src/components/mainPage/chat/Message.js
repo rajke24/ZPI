@@ -1,11 +1,11 @@
 import React from 'react';
 import './Message.scss';
 
-const Message = ({message, type}) => {
+const Message = ({message}) => {
     return (
-        <div className={`message-wrapper ${type}`}>
+        <div className={`message-wrapper ${message.message_type}`}>
             <div className='message'>
-                <span>{message}</span>
+                <span>{message.content}</span>
             </div>
         </div>
     );

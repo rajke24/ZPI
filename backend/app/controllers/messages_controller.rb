@@ -1,18 +1,19 @@
 class MessagesController < ApplicationController
   def save_message
-    passed_params = message_params
+    destination_user = User.find_by(email: message_params[:mail_to])
 
-    destination_user = User.find_by(email: passed_params[:mail_to])
-
-    params_for_save = {
+    new_message = {
       user_from: current_user,
       user_to: destination_user,
-      content: passed_params[:content],
-      message_type: passed_params[:type],
-      sent_at: passed_params[:sent_at]
+      content: message_params[:content],
+      message_type: message_params[:type],
+      sent_at: message_params[:sent_at]
     }
 
-    Message.create!(params_for_save)
+    Message.create!(new_message)
+    messages = Message.where(user_to_id: [destination_user.id, current_user.id], user_from_id: [destination_user.id, current_user.id]).order(:sent_at)
+
+    ActionCable.server.broadcast('messages', { messages: messages})
   end
 
   def find_waiting_messages
