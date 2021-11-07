@@ -1,4 +1,4 @@
-import {LOGOUT} from "../components/template/AppTemplateActions";
+import {LOGOUT, PROFILE_LOAD} from "../components/template/AppTemplateActions";
 import {LOGIN} from "../components/authPages/LoginPageActions";
 
 const initialState = {
@@ -16,6 +16,11 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 ...action.tokens
+            }
+        case PROFILE_LOAD:
+            return {
+                ...state,
+                profile: action.profile,
             }
         default:
             return state

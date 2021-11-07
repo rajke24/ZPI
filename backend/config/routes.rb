@@ -31,5 +31,7 @@ Rails.application.routes.draw do
 
     post 'reset_password', to: 'passwords#reset'
     post 'forgot_password', to: 'passwords#forgot'
+
+    get 'profile', to: 'profile#show'
   end
 end

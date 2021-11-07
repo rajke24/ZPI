@@ -10,7 +10,11 @@
   border-bottom-right-radius: 5px;
 
   &:nth-child(odd) {
-    background: $graphite;
+    background: $very-light-grey;
+  }
+
+  &:hover {
+    background: $very-light-grey;
   }
 
   .conversation-info {

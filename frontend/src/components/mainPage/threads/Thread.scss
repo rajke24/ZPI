@@ -10,10 +10,10 @@
   cursor: pointer;
 
   &:nth-child(odd) {
-    background: $graphite;
+    background: $very-light-grey;
   }
 
   &:hover {
-    background: red;
+    background: $very-light-grey;
   }
 }

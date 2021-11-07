@@ -5,7 +5,7 @@ import {defaultRoute, matchesAnyAuthorizedRoute} from "../../AuthorizedRoutes";
 import {useHistory, useLocation} from "react-router";
 
 const AppTemplateAuthorized = ({children}) => {
-    const profile = useSelector(state => state.persistentState.access_token);
+    const profile = useSelector(state => state.persistentState.profile);
     const location = useLocation();
     const history = useHistory();
 

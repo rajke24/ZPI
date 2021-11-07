@@ -1,5 +1,6 @@
 import axios from 'axios/index';
 import {push} from 'react-router-redux';
+import {reloadProfile} from "../template/AppTemplateActions";
 
 export const LOGIN = 'LOGIN';
 
@@ -15,6 +16,9 @@ export const login = dispatch => (email, password, authenticationCode, errorCall
             tokens: tokenResponse.data
         });
         dispatch(push('/'));
+        setTimeout(() => {
+            reloadProfile(dispatch)();
+        }, 500);
     }).catch(exception => {
         if (exception && exception.status === 400 && exception.data.error === 'invalid_grant') {
             errorCallback()
