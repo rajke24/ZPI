@@ -15,9 +15,10 @@ export const login = dispatch => (email, password, authenticationCode, errorCall
             type: LOGIN,
             tokens: tokenResponse.data
         });
-        dispatch(push('/'));
+
+        reloadProfile(dispatch)();
         setTimeout(() => {
-            reloadProfile(dispatch)();
+            dispatch(push('/'));
         }, 500);
     }).catch(exception => {
         if (exception && exception.status === 400 && exception.data.error === 'invalid_grant') {

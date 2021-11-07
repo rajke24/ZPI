@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './Chat.scss';
 import Avatar from "../../../common/avatar/Avatar";
 import Message from "./Message";
 import Icon, {sendIcon} from "../../../common/icons/Icon";
+import {get, save} from "../../../shared/ApiClientBuilder";
 
 const messages = [
     {id: 1, type: 'sent', message: 'Cześć'},
@@ -13,36 +14,20 @@ const messages = [
     {id: 1, type: 'sent', message: 'Cześć'},
     {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
     {id: 3, type: 'received', message: 'Siemka'},
-    // {id: 3, type: 'received', message: 'Wszystko w porządku'},
-    // {id: 3, type: 'sent', message: 'Nie chcesz wyjść na piwo jutro ?'},
-    // {id: 1, type: 'sent', message: 'Cześć'},
-    // {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
-    // {id: 3, type: 'received', message: 'Siemka'},
-    // {id: 3, type: 'received', message: 'Wszystko w porządku'},
-    // {id: 3, type: 'sent', message: 'Nie chcesz wyjść na piwo jutro ?'},
-    // {id: 1, type: 'sent', message: 'Cześć'},
-    // {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
-    // {id: 3, type: 'received', message: 'Siemka'},
-    // {id: 3, type: 'received', message: 'Wszystko w porządku'},
-    // {id: 3, type: 'sent', message: 'Nie chcesz wyjść na piwo jutro ?'},
-    // {id: 1, type: 'sent', message: 'Cześć'},
-    // {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
-    // {id: 3, type: 'received', message: 'Siemka'},
-    // {id: 3, type: 'received', message: 'Wszystko w porządku'},
-    // {id: 3, type: 'sent', message: 'Nie chcesz wyjść na piwo jutro ?'},
-    // {id: 1, type: 'sent', message: 'Cześć'},
-    // {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
-    // {id: 3, type: 'received', message: 'Siemka'},
-    // {id: 3, type: 'received', message: 'Wszystko w porządku'},
-    // {id: 3, type: 'sent', message: 'Nie chcesz wyjść na piwo jutro ?'},
-    // {id: 1, type: 'sent', message: 'Cześć'},
-    // {id: 2, type: 'sent', message: 'Co tam u ciebie słychać ?'},
-    // {id: 3, type: 'received', message: 'Siemka'},
-    // {id: 3, type: 'received', message: 'Wszystko w porządku'},
-    // {id: 3, type: 'sent', message: 'Nie chcesz wyjść na piwo jutro ?'},
 ]
 
 const Chat = () => {
+    const [message, setMessage] = useState();
+
+    const actions = {
+        sendMessage: () => save('message/save_message', 'POST', {
+            content: message,
+            mail_to: 'tabaluga@mm.pl',
+            sent_at: new Date(),
+            type: 'type'
+        }),
+    }
+
     return (
         <div className='chat'>
             <div className='header'>
@@ -53,8 +38,8 @@ const Chat = () => {
                 {messages.map(({type, message}) => <Message type={type} message={message} /> )}
             </div>
             <div className='chat-input'>
-                <input placeholder='Type a new message...'/>
-                <button>
+                <input onChange={e => setMessage(e.target.value)} placeholder='Type a new message...'/>
+                <button onClick={() => actions.sendMessage()}>
                     Send
                     <Icon icon={sendIcon} />
                 </button>

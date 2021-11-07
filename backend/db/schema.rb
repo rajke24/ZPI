@@ -22,7 +22,7 @@ ActiveRecord::Schema.define(version: 2021_11_02_150914) do
     t.bigint "user_from_id", null: false
     t.bigint "user_to_id", null: false
     t.text "content", null: false
-    t.string "type", null: false
+    t.string "message_type", null: false
     t.datetime "sent_at", null: false
     t.index ["user_from_id"], name: "index_messages_on_user_from_id"
     t.index ["user_to_id"], name: "index_messages_on_user_to_id"

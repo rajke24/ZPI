@@ -4,8 +4,8 @@
 #
 #  id           :bigint           not null, primary key
 #  content      :text             not null
+#  message_type :string           not null
 #  sent_at      :datetime         not null
-#  type         :string           not null
 #  user_from_id :bigint           not null
 #  user_to_id   :bigint           not null
 #

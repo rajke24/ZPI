@@ -2,13 +2,13 @@ class MessagesController < ApplicationController
   def save_message
     passed_params = message_params
 
-    destination_user = User.first(email: passed_params[:mail_to])
+    destination_user = User.find_by(email: passed_params[:mail_to])
 
     params_for_save = {
-      user_from: current_user.id,
-      user_to: destination_user.id,
+      user_from: current_user,
+      user_to: destination_user,
       content: passed_params[:content],
-      type: passed_params[:type],
+      message_type: passed_params[:type],
       sent_at: passed_params[:sent_at]
     }
 
