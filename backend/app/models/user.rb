@@ -35,12 +35,20 @@ class User < ApplicationRecord
            dependent: :delete_all # or :destroy if you need callbacks
 
   has_many :received_messages,
-           :foreign_key => "user_to_id",
+           :foreign_key => "receiver_id",
            :class_name => "Message"
 
   has_many :sent_messages,
-           :foreign_key => "user_from_id",
+           :foreign_key => "sender_id",
            :class_name => "Message"
+
+  has_many :sent_invitations,
+           :foreign_key => "inviter_id",
+           :class_name => "Invitation"
+
+  has_many :received_invitations,
+           :foreign_key => 'invitee_id',
+           :class_name => "Invitation"
 
   validates_presence_of :email, :password_digest
   validates_uniqueness_of :email, case_sensitive: false

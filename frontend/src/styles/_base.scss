@@ -4,11 +4,33 @@
   overflow: hidden;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 3px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: none;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #dddddd;
+    border-radius: 10px
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #90969a
+  }
 }
 
 button {

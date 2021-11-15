@@ -20,6 +20,9 @@ Rails.application.routes.draw do
         post 'find_message'
       end
     end
+    resource :invitation, only: [:create] do
+
+    end
 
     #  sign_up controller routes (te po prostu są tak proste że nawet nie wiem czy da się inaczej)
     post 'sign_up', to: 'sign_up#sign_up'

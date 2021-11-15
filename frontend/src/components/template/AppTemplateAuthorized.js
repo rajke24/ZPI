@@ -3,6 +3,8 @@ import {useSelector} from "react-redux";
 import "./AppTemplateAuthorized.scss"
 import {defaultRoute, matchesAnyAuthorizedRoute} from "../../AuthorizedRoutes";
 import {useHistory, useLocation} from "react-router";
+import Sidebar from "../navigation/Sidebar";
+import Topbar from "../navigation/Topbar";
 
 const AppTemplateAuthorized = ({children}) => {
     const profile = useSelector(state => state.persistentState.profile);
@@ -12,9 +14,15 @@ const AppTemplateAuthorized = ({children}) => {
     if (profile && !matchesAnyAuthorizedRoute(location.pathname)) history.push(defaultRoute());
 
     return <>
-        {profile && <div className='app-container'>
-            {children}
-        </div>}
+        {profile && <div className='app-wrapper'>
+            <div className='app-container'>
+                <Sidebar/>
+                <Topbar/>
+                <div className='app'>
+                    {children}
+                </div>
+            </div>
+        </div> }
     </>
 }
 
