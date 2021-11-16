@@ -14,6 +14,8 @@ class SignUpController < ApplicationController
     render json: is_email_unique
   end
 
+  private
+
   ALLOWED_PARAMS = [:email, :password]
 
   def user_params

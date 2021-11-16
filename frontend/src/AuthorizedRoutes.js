@@ -1,11 +1,13 @@
 import {Route} from "react-router-dom";
 import {matchPath} from "react-router";
-import MainPage from "./components/mainPage/MainPage";
+import Chat from "./components/mainPage/chat/Chat";
+import Invitations from "./components/invitations/Invitations";
 
 export const authorizedRoutes = [
     // {path: '/contacts', component: Contacts},
     // {path: '/profile', component: Profile},
-    {path: '/', component: MainPage}
+    {path: '/chat/:name?', component: Chat},
+    {path: '/invitations', component: Invitations},
 ]
 
 export const matchesAnyAuthorizedRoute = (path) => {
@@ -13,7 +15,7 @@ export const matchesAnyAuthorizedRoute = (path) => {
 }
 
 export const defaultRoute = () => {
-    return '/'
+    return '/chat'
 };
 
 const AuthorizedRoutes = () => {

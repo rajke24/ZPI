@@ -1,19 +1,19 @@
 class MessagesController < ApplicationController
   def save_message
-    destination_user = User.find_by(email: message_params[:mail_to])
+    destination_user = User.find_by(id: message_params[:receiver_id])
 
     new_message = {
-      user_from: current_user,
-      user_to: destination_user,
+      sender: current_user,
+      receiver: destination_user,
       content: message_params[:content],
       message_type: message_params[:type],
       sent_at: message_params[:sent_at]
     }
 
     Message.create!(new_message)
-    messages = Message.where(user_to_id: [destination_user.id, current_user.id], user_from_id: [destination_user.id, current_user.id]).order(:sent_at)
+    message = Message.where(receiver_id: [destination_user.id, current_user.id], sender_id: [destination_user.id, current_user.id]).order(:sent_at).last
 
-    ActionCable.server.broadcast('messages', { messages: messages})
+    ActionCable.server.broadcast('messages', { message: message })
   end
 
   def find_waiting_messages
@@ -23,7 +23,9 @@ class MessagesController < ApplicationController
     waiting_messages.delete_all
   end
 
-  PASSED_MESSAGE_PARAMS = [:content, :mail_to, :sent_at, :type]
+  private
+
+  PASSED_MESSAGE_PARAMS = [:content, :receiver_id, :sent_at, :type]
 
   def message_params
     params.permit(PASSED_MESSAGE_PARAMS)

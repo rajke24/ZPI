@@ -1,0 +1,47 @@
+@import 'src/styles/variables';
+
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 100px;
+  width: calc(100% - 100px);
+  border-top-right-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 40px 0 40px;
+
+  .title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 32px;
+
+    &:first-letter {
+      text-transform: capitalize;
+    }
+  }
+
+  .profile {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    cursor: pointer;
+    margin-left: auto;
+
+    .profile-email {
+      margin-right: 15px;
+      display: flex;
+
+      span {
+        font-size: 13px;
+        font-weight: 500;
+        color: #555555;
+      }
+    }
+
+    .avatar {
+      width: 45px;
+      height: 45px;
+    }
+  }
+}

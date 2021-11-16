@@ -20,6 +20,10 @@
     .message {
       margin-right: auto;
       background: $semi-light-green;
+
+      &:first-of-type {
+        border-bottom-left-radius: 0;
+      }
     }
   }
 
@@ -27,6 +31,7 @@
     .message {
       margin-left: auto;
       background: $fuchsia-rose;
+      border-bottom-right-radius: 0;
     }
   }
 }

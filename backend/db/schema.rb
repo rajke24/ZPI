@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_02_150914) do
+ActiveRecord::Schema.define(version: 2021_11_15_103727) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -18,14 +18,25 @@ ActiveRecord::Schema.define(version: 2021_11_02_150914) do
   create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "inviter_id", null: false
+    t.bigint "invitee_id", null: false
+    t.string "status"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["invitee_id"], name: "index_invitations_on_invitee_id"
+    t.index ["inviter_id", "invitee_id"], name: "index_invitations_on_inviter_id_and_invitee_id", unique: true
+    t.index ["inviter_id"], name: "index_invitations_on_inviter_id"
+  end
+
   create_table "messages", force: :cascade do |t|
-    t.bigint "user_from_id", null: false
-    t.bigint "user_to_id", null: false
+    t.bigint "sender_id", null: false
+    t.bigint "receiver_id", null: false
     t.text "content", null: false
     t.string "message_type", null: false
     t.datetime "sent_at", null: false
-    t.index ["user_from_id"], name: "index_messages_on_user_from_id"
-    t.index ["user_to_id"], name: "index_messages_on_user_to_id"
+    t.index ["receiver_id"], name: "index_messages_on_receiver_id"
+    t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
 
   create_table "oauth_access_grants", force: :cascade do |t|
@@ -85,8 +96,10 @@ ActiveRecord::Schema.define(version: 2021_11_02_150914) do
     t.json "signed_prekey"
   end
 
-  add_foreign_key "messages", "users", column: "user_from_id"
-  add_foreign_key "messages", "users", column: "user_to_id"
+  add_foreign_key "invitations", "users", column: "invitee_id"
+  add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "messages", "users", column: "receiver_id"
+  add_foreign_key "messages", "users", column: "sender_id"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"

@@ -6,21 +6,21 @@
 #  content      :text             not null
 #  message_type :string           not null
 #  sent_at      :datetime         not null
-#  user_from_id :bigint           not null
-#  user_to_id   :bigint           not null
+#  receiver_id  :bigint           not null
+#  sender_id    :bigint           not null
 #
 # Indexes
 #
-#  index_messages_on_user_from_id  (user_from_id)
-#  index_messages_on_user_to_id    (user_to_id)
+#  index_messages_on_receiver_id  (receiver_id)
+#  index_messages_on_sender_id    (sender_id)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (user_from_id => users.id)
-#  fk_rails_...  (user_to_id => users.id)
+#  fk_rails_...  (receiver_id => users.id)
+#  fk_rails_...  (sender_id => users.id)
 #
 class Message < ApplicationRecord
-  belongs_to :user_from,  class_name: "User"
-  belongs_to :user_to,    class_name: "User"
+  belongs_to :sender, class_name: "User"
+  belongs_to :receiver, class_name: "User"
 
 end
