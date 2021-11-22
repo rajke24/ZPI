@@ -21,27 +21,45 @@
     }
   }
 
-  .profile {
+  .right-side {
     display: flex;
     align-items: center;
-    padding: 0 10px;
-    cursor: pointer;
-    margin-left: auto;
+    justify-content: center;
 
-    .profile-email {
-      margin-right: 15px;
-      display: flex;
+    .invite-btn {
+      margin: 0 50px 0 20px;
+      padding: 15px 10px;
+      background: $semi-light-green;
+      font-weight: 600;
+      color: white;
+      transition: 0.5s ease;
 
-      span {
-        font-size: 13px;
-        font-weight: 500;
-        color: #555555;
+      &:hover {
+        background: #15c986;
       }
+    }
+
+    span {
+      font-size: 13px;
+      font-weight: 500;
+      color: #555555;
+      margin-right: 50px;
     }
 
     .avatar {
       width: 45px;
       height: 45px;
+    }
+
+    input {
+      border: 2px solid $graphite;
+      border-radius: 15px;
+      padding: 5px 10px;
+      background: transparent;
+
+      &:active, &:focus {
+        background: transparent;
+      }
     }
   }
 }

@@ -1,32 +1,36 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
-import {post} from "../../shared/ApiClientBuilder";
+import {get, post} from "../../shared/ApiClientBuilder";
+import ReceivedInvitation from "./ReceivedInvitation";
+import SentInvitation from "./SentInvitation";
+import * as classnames from "classnames";
+import './Invitations.scss';
 
 const Invitations = () => {
     const formik = useDefaultFormik({
         initialValues: {},
     })
+    const [invitations, setInvitations] = useState();
+    const [activeTab, setActiveTab] = useState('received');
 
     const actions = {
-        sendInvitation: (params, callback) => post('/invitation', params, callback)
+        fetchInvitations: (callback) => get('/invitations', null, callback)
     }
 
-    const sendInvitation = async event => {
-        event.preventDefault();
-        const {invitee_email} = formik.values;
-        actions.sendInvitation({invitee_email})
-    }
+    useEffect(() => actions.fetchInvitations(data => setInvitations(data)) ,[activeTab])
 
     return (
-        <div style={{background: '#fff'}}>
-            {buildFields([
-                {
-                    fieldType: 'input',
-                    name: 'invitee_email',
-                    placeholder: 'email',
+        <div className='invitations'>
+            <div className='tabs'>
+                <button className={classnames('tab', {active: activeTab === 'received'})} onClick={() => setActiveTab('received')}>Received</button>
+                <button className={classnames('tab', {active: activeTab === 'sent'})} onClick={() => setActiveTab('sent')}>Sent</button>
+            </div>
+            {invitations && <div>
+                {activeTab === 'received' ?
+                    invitations[activeTab].map(invitation => <ReceivedInvitation invitation={invitation}/>) :
+                    invitations[activeTab].map(invitation => <SentInvitation invitation={invitation}/>)
                 }
-            ], formik, null)}
-            <button onClick={sendInvitation}>send invitation</button>
+            </div>}
         </div>
     );
 };

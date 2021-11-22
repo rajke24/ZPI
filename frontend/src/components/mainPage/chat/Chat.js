@@ -21,14 +21,14 @@ const Chat = () => {
         MessagesChannel.received = data => {
             const message = {...data.message, message_type: data.message.sender_id === profile.id ? 'sent' : 'received'}
             const otherUserId = profile.id === message.receiver_id ? message.sender_id : message.receiver_id
-            db.conversations.where({sender_id: profile.id, receiver_id: otherUserId}).modify(c => c.messages.push(message))
+            db.conversations.where({sender_id: profile.id, 'receiver.id': otherUserId}).modify(c => c.messages.push(message))
         }
     }, [params.name])
 
     const actions = {
-        sendMessage: () => save('message/save_message', 'POST', {
+        sendMessage: () => save('messages/save_message', 'POST', {
             content: currentMessage,
-            receiver_id: conversation.receiver_id,
+            receiver_id: conversation.receiver.id,
             sent_at: new Date(),
             type: 'type'
         }, () => setCurrentMessage('')),
@@ -43,11 +43,11 @@ const Chat = () => {
     return (
         <div className='chat'>
             <Conversations />
-            <div className='chat-window'>
+            {conversation && <div className='chat-window'>
                 <div className='chat-header'>
                     <Avatar name='Tabaluga' color='#1181A5'/>
                     <div className='friend-info'>
-                        <span className='name'>Tabaluga</span>
+                        <span className='name'>{conversation.receiver.email}</span>
                         <span className='status'>Online</span>
                     </div>
                 </div>
@@ -62,7 +62,7 @@ const Chat = () => {
                         <Icon icon={sendIcon}/>
                     </button>
                 </div>
-            </div>
+            </div>}
         </div>
     );
 };

@@ -45,14 +45,14 @@ const formGroup = (WrappedComponent) => {
 
         return <> {label || placeholder ?
             <div style={{width: '100%'}}>
-                <div className="label">
-                    { label && <label for={name}>
+                {label && <div className="label">
+                     <label for={name}>
                         {isRequiredField(validationSchema, name) &&
                         <span className="required-star">*</span>
                         }
                         {fieldName}
-                    </label>}
-                </div>
+                    </label>
+                </div>}
                 <div>
                     {error && <FormFeedback error={true} full={false}>
                         {`${fieldName} ${formatMessage(error.message, error.params)}`}
