@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import './Invitation.scss';
 import Avatar from "../../common/avatar/Avatar";
 import {remove} from '../../shared/ApiClientBuilder';
-import {createConversation} from "../../storage/db";
 import {useSelector} from "react-redux";
 
 const SentInvitation = ({invitation}) => {
@@ -15,13 +14,10 @@ const SentInvitation = ({invitation}) => {
     };
 
     useEffect(() => {
-        if (!isPendingInvitation) {
-            const {invitee} = invitation;
-            actions.deleteInvitation();
-            createConversation(invitee.email, profile, invitee);
+        return () => {
+            if (!isPendingInvitation) actions.deleteInvitation();
         }
     }, [])
-
 
     return (
         <div className='invitation'>

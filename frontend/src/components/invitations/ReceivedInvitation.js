@@ -16,7 +16,7 @@ const ReceivedInvitation = ({invitation}) => {
     const acceptInvitation = () => {
         const {inviter} = invitation;
         actions.manageInvitation({status: 'accepted'}, () => setInvitationStatus('accepted'));
-        createConversation(inviter.email, profile, inviter);
+        createConversation(profile, inviter);
     }
 
     const rejectInvitation = () => {

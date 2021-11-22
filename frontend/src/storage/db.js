@@ -6,12 +6,12 @@ db.version(6).stores(
     { conversations: "++id,receiver,sender_id,name,messages"}
 )
 
-export const createConversation = async (name, sender, receiver) => {
+export const createConversation = async (sender, receiver, messages=[]) => {
     await db.conversations.add({
-        name,
+        name: receiver.email,
         sender_id: sender.id,
         receiver,
-        messages: []
+        messages
     })
 }
 

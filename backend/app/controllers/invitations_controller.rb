@@ -38,6 +38,10 @@ class InvitationsController < ApplicationController
     end
   end
 
+  def accepted
+    @invitations = current_user.sent_invitations.where(status: 'accepted')
+  end
+
   private
 
   ALLOWED_PARAMS = [:invitee_email, :status]

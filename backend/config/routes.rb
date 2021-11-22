@@ -23,6 +23,7 @@ Rails.application.routes.draw do
     resources :invitations do
       collection do
         get :check
+        get :accepted
       end
     end
 
