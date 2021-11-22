@@ -14,14 +14,16 @@ Rails.application.routes.draw do
     #   end
     # end
 
-    resource :message do
+    resources :messages do
       collection do
         post 'save_message'
         post 'find_message'
       end
     end
-    resource :invitation, only: [:create] do
-
+    resources :invitations do
+      collection do
+        get :check
+      end
     end
 
     #  sign_up controller routes (te po prostu są tak proste że nawet nie wiem czy da się inaczej)

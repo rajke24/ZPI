@@ -17,7 +17,7 @@ const Conversation = ({name, lastMessage}) => {
                 <Avatar name={name} color='#1181A5' />
                 <div className='conversation-info'>
                     <span className='name'>{name}</span>
-                    <span className='last-message'>{lastMessage.sender_id === profile.id ? 'You:' : 'Him:'} {lastMessage.content}</span>
+                    {lastMessage && <span className='last-message'>{lastMessage.sender_id === profile.id ? 'You:' : 'Him:'} {lastMessage.content}</span>}
                 </div>
             </div>
         </div>

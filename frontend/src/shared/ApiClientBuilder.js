@@ -36,7 +36,7 @@ export const save = (url, method, data, callback) => {
     );
 }
 
-const remove = (url, callback) => {
+export const remove = (url, callback) => {
     let config = {
         url,
         method: "DELETE",
