@@ -1,6 +1,8 @@
 class MessagesController < ApplicationController
   def save_message
     destination_user = User.find_by(id: message_params[:receiver_id])
+    p current_user
+    p destination_user
 
     new_message = {
       sender: current_user,
@@ -22,8 +24,6 @@ class MessagesController < ApplicationController
     # TODO wait for confirmation from user?
     waiting_messages.delete_all
   end
-
-  private
 
   PASSED_MESSAGE_PARAMS = [:content, :receiver_id, :sent_at, :type]
 

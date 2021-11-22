@@ -26,12 +26,33 @@ const Chat = () => {
     }, [params.name])
 
     const actions = {
-        sendMessage: () => save('messages/save_message', 'POST', {
-            content: currentMessage,
-            receiver_id: conversation.receiver.id,
-            sent_at: new Date(),
-            type: 'type'
-        }, () => setCurrentMessage('')),
+        sendMessage: () => {
+            const encryptedMessage = currentMessage + '/'
+            save('messages/save_message', 'POST', {
+                content: encryptedMessage,
+                receiver_id: conversation.receiver.id,
+                sent_at: new Date(),
+                type: 'type'
+            }, () => setCurrentMessage(''))
+        },
+        sendPreKeys: () => {
+            const def = new window.libsignal.SignalProtocolAddress("abc", 1);
+
+            window.libsignal.KeyHelper.generateIdentityKeyPair().then(myIdentityKeyPair => {
+                window.libsignal.KeyHelper.generatePreKey(0).then(myPreKey => {
+                   window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
+                       const payload = {
+                           'identity_key': myIdentityKeyPair.pubKey,
+                           'prekeys': [
+                               myPreKey
+                           ],
+                           'signed_prekey': mySignedPreKey
+                       };
+                       save('pre_keys_bundle', 'POST', payload, () => console.log("Done!"));
+                   });
+                });
+            });
+        }
     }
 
     const onEnterPress = (e) => {
@@ -60,6 +81,11 @@ const Chat = () => {
                     <button onClick={actions.sendMessage}>
                         Send
                         <Icon icon={sendIcon}/>
+                    </button>
+                </div>
+                <div classname='send_prekeys'>
+                    <button onClick={actions.sendPreKeys}>
+                        PreKeys
                     </button>
                 </div>
             </div>}
