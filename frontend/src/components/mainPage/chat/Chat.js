@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './Chat.scss';
 import Message from "./Message";
 import Icon, {sendIcon} from "../../../common/icons/Icon";
-import {post, save} from "../../../shared/ApiClientBuilder";
+import {get, post, save} from "../../../shared/ApiClientBuilder";
 import MessagesChannel from '../../../channels/messages_channel'
 import {useSelector} from "react-redux";
 import {useLiveQuery} from "dexie-react-hooks";
@@ -72,7 +72,12 @@ const Chat = () => {
                     });
                 });
             });
+        },
+        getPreKeys: () => {
+            console.log(conversation.receiver.id)
+            get("/pre_keys_bundle/", {id: conversation.receiver.id}, (result) => console.log(result));
         }
+
     }
 
     const onEnterPress = (e) => {
@@ -105,7 +110,12 @@ const Chat = () => {
                 </div>
                 <div classname='send_prekeys'>
                     <button onClick={actions.sendPreKeys}>
-                        PreKeys
+                        PreKeys send
+                    </button>
+                </div>
+                <div classname='get_prekeys'>
+                    <button onClick={actions.getPreKeys}>
+                        PreKeys get
                     </button>
                 </div>
             </div>}
