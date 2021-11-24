@@ -10,6 +10,9 @@ import db from '../../../storage/db';
 import {useParams} from "react-router";
 import Conversations from "../conversations/Conversations";
 import Avatar from "../../../common/avatar/Avatar";
+import SignalProtocolStore from "../../../common/InMemorySignalProtocolStore";
+
+let myProtocolStore;
 
 const Chat = () => {
     const [currentMessage, setCurrentMessage] = useState('');
@@ -21,63 +24,101 @@ const Chat = () => {
         MessagesChannel.received = data => {
             const message = {...data.message, message_type: data.message.sender_id === profile.id ? 'sent' : 'received'}
             const otherUserId = profile.id === message.receiver_id ? message.sender_id : message.receiver_id
-            db.conversations.where({sender_id: profile.id, 'receiver.id': otherUserId}).modify(c => c.messages.push(message))
+            const sessionCipher = new window.libsignal.SessionCipher(myProtocolStore, new window.libsignal.SignalProtocolAddress(otherUserId.toString(), 1));
+            sessionCipher.decryptPreKeyWhisperMessage(JSON.parse(message.content).body, 'binary').then(newPlaintext => {
+                message.content = new TextDecoder('utf-8').decode(newPlaintext);
+                db.conversations.where({sender_id: profile.id, 'receiver.id': otherUserId}).modify(c => c.messages.push(message))
+            });
+
         }
     }, [params.name])
 
+    function arraybuffer_to_string(arraybuffer) {
+        return JSON.stringify(Array.from(new Uint8Array(arraybuffer)))
+    }
+
+    function string_to_arraybuffer(string) {
+        return new Uint8Array(JSON.parse(string)).buffer;
+    }
+
+
+
     const actions = {
         sendMessage: () => {
-            const encryptedMessage = currentMessage + '/'
-            save('messages/save_message', 'POST', {
-                content: encryptedMessage,
-                receiver_id: conversation.receiver.id,
-                sent_at: new Date(),
-                type: 'type'
-            }, () => setCurrentMessage(''))
+            const sessionCipher = new window.libsignal.SessionCipher(myProtocolStore, new window.libsignal.SignalProtocolAddress(conversation.receiver.id.toString(), 1));
+            sessionCipher.encrypt(currentMessage).then(ciphertext => {
+               save('messages/save_message', 'POST', {
+                   content: JSON.stringify(ciphertext),
+                   receiver_id: conversation.receiver.id,
+                   sent_at: new Date(),
+                   type: 'type'
+               }, () => setCurrentMessage(''))
+            });
         },
         sendPreKeys: () => {
-           function arraybuffer_to_string(arraybuffer) {
-               return JSON.stringify(Array.from(new Uint8Array(arraybuffer)))
-           }
-
-           function string_to_arraybuffer(string) {
-               return new Uint8Array(JSON.parse(string)).buffer;
-           }
-
             window.libsignal.KeyHelper.generateIdentityKeyPair().then(myIdentityKeyPair => {
-                window.libsignal.KeyHelper.generatePreKey(0).then(myPreKey => {
-                    window.libsignal.KeyHelper.generatePreKey(1).then(myPreKey2 => {
+                window.libsignal.KeyHelper.generatePreKey(1).then(myPreKey => {
+                    window.libsignal.KeyHelper.generatePreKey(2).then(myPreKey2 => {
                         window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
-                            let config = {
-                                identityKey: arraybuffer_to_string(myIdentityKeyPair.pubKey),
-                                preKeys: [
-                                    {
-                                        keyId: myPreKey.keyId,
-                                        publicKey: arraybuffer_to_string(myPreKey.keyPair.pubKey)
-                                    },
-                                    {
-                                        keyId: myPreKey2.keyId,
-                                        publicKey: arraybuffer_to_string(myPreKey2.keyPair.pubKey)
-                                    }
-                                ],
-                                signedPreKey: {
-                                    keyId: mySignedPreKey.keyId,
-                                    publicKey: arraybuffer_to_string(mySignedPreKey.keyPair.pubKey),
-                                    signature: arraybuffer_to_string(mySignedPreKey.signature)
-                                }
-                            };
-                            console.log(config);
-                            post('pre_keys_bundle', config, () => console.log("Done!"));
+                            const myRegistrationId = 1;
+
+                            myProtocolStore = new SignalProtocolStore();
+                            myProtocolStore.put('identityKey', myIdentityKeyPair);
+                            myProtocolStore.put('registrationId', myRegistrationId);
+                            myProtocolStore.storePreKey(myPreKey.keyId, myPreKey).then(() => {
+                               myProtocolStore.storeSignedPreKey(mySignedPreKey.keyId, mySignedPreKey).then(() => {
+                                   console.log(myProtocolStore);
+
+                                   let my_prekey_bundle_data = {
+                                       identityKey: arraybuffer_to_string(myIdentityKeyPair.pubKey),
+                                       preKeys: [
+                                           {
+                                               keyId: myPreKey.keyId,
+                                               publicKey: arraybuffer_to_string(myPreKey.keyPair.pubKey)
+                                           },
+                                           {
+                                               keyId: myPreKey2.keyId,
+                                               publicKey: arraybuffer_to_string(myPreKey2.keyPair.pubKey)
+                                           }
+                                       ],
+                                       signedPreKey: {
+                                           keyId: mySignedPreKey.keyId,
+                                           publicKey: arraybuffer_to_string(mySignedPreKey.keyPair.pubKey),
+                                           signature: arraybuffer_to_string(mySignedPreKey.signature)
+                                       }
+                                   };
+                                   post('pre_keys_bundle', my_prekey_bundle_data, () => console.log("Prekey bundle data sent!"));
+                               });
+                            });
                         });
                     });
                 });
             });
         },
         getPreKeys: () => {
-            console.log(conversation.receiver.id)
-            get("/pre_keys_bundle/", {id: conversation.receiver.id}, (result) => console.log(result));
-        }
+            get("/pre_keys_bundle/", {id: conversation.receiver.id}, (result) => {
+                let receivedPreKeyBundle = {
+                    registrationId: 1, //TODO
+                    identityKey: string_to_arraybuffer(result.identity_key),
+                    preKey: {
+                        keyId: result.prekey.keyId,
+                        publicKey: string_to_arraybuffer(result.prekey.publicKey)
+                    },
+                    signedPreKey: {
+                        keyId: result.signed_key.keyId,
+                        publicKey: string_to_arraybuffer(result.signed_key.publicKey),
+                        signature: string_to_arraybuffer(result.signed_key.signature)
+                    }
+                };
+                let receiverAddress = new window.libsignal.SignalProtocolAddress(conversation.receiver.id.toString(), 1);
 
+                let sessionBuilder = new window.libsignal.SessionBuilder(myProtocolStore, receiverAddress);
+                sessionBuilder.processPreKey(receivedPreKeyBundle).then(() => {
+                    console.log("Przetworzono prekey!");
+                });
+
+            });
+        }
     }
 
     const onEnterPress = (e) => {
@@ -85,6 +126,9 @@ const Chat = () => {
             actions.sendMessage();
         }
     }
+
+
+
 
     return (
         <div className='chat'>
@@ -108,7 +152,7 @@ const Chat = () => {
                         <Icon icon={sendIcon}/>
                     </button>
                 </div>
-                <div classname='send_prekeys'>
+                <div className='send_prekeys'>
                     <button onClick={actions.sendPreKeys}>
                         PreKeys send
                     </button>

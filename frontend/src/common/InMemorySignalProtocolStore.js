@@ -75,7 +75,7 @@ SignalProtocolStore.prototype = {
   loadPreKey: function (keyId) {
     var res = this.get('25519KeypreKey' + keyId);
     if (res !== undefined) {
-      res = {pubKey: res.pubKey, privKey: res.privKey};
+      res = {pubKey: res.keyPair.pubKey, privKey: res.keyPair.privKey};
     }
     return Promise.resolve(res);
   },
@@ -90,7 +90,7 @@ SignalProtocolStore.prototype = {
   loadSignedPreKey: function (keyId) {
     var res = this.get('25519KeysignedKey' + keyId);
     if (res !== undefined) {
-      res = {pubKey: res.pubKey, privKey: res.privKey};
+      res = {pubKey: res.keyPair.pubKey, privKey: res.keyPair.privKey};
     }
     return Promise.resolve(res);
   },
