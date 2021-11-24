@@ -18,7 +18,7 @@ class PrekeysBundleController < ApplicationController
     # TODO remove taken prekey
   end
 
-  PREKEY_BUNDLE_PARAMS = [:identityKey, :preKeys, :signedPreKey]
+  private PREKEY_BUNDLE_PARAMS = [:identityKey, {preKeys: [:keyId, :publicKey]}, {signedPreKey: [:keyId, :publicKey, :signature]}]
 
   def message_params
     params.permit(PREKEY_BUNDLE_PARAMS)

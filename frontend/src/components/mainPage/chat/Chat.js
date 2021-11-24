@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './Chat.scss';
 import Message from "./Message";
 import Icon, {sendIcon} from "../../../common/icons/Icon";
-import {save} from "../../../shared/ApiClientBuilder";
+import {post, save} from "../../../shared/ApiClientBuilder";
 import MessagesChannel from '../../../channels/messages_channel'
 import {useSelector} from "react-redux";
 import {useLiveQuery} from "dexie-react-hooks";
@@ -36,20 +36,40 @@ const Chat = () => {
             }, () => setCurrentMessage(''))
         },
         sendPreKeys: () => {
-            const def = new window.libsignal.SignalProtocolAddress("abc", 1);
+           function arraybuffer_to_string(arraybuffer) {
+               return JSON.stringify(Array.from(new Uint8Array(arraybuffer)))
+           }
+
+           function string_to_arraybuffer(string) {
+               return new Uint8Array(JSON.parse(string)).buffer;
+           }
 
             window.libsignal.KeyHelper.generateIdentityKeyPair().then(myIdentityKeyPair => {
                 window.libsignal.KeyHelper.generatePreKey(0).then(myPreKey => {
-                   window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
-                       const payload = {
-                           'identity_key': myIdentityKeyPair.pubKey,
-                           'prekeys': [
-                               myPreKey
-                           ],
-                           'signed_prekey': mySignedPreKey
-                       };
-                       save('pre_keys_bundle', 'POST', payload, () => console.log("Done!"));
-                   });
+                    window.libsignal.KeyHelper.generatePreKey(1).then(myPreKey2 => {
+                        window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
+                            let config = {
+                                identityKey: arraybuffer_to_string(myIdentityKeyPair.pubKey),
+                                preKeys: [
+                                    {
+                                        keyId: myPreKey.keyId,
+                                        publicKey: arraybuffer_to_string(myPreKey.keyPair.pubKey)
+                                    },
+                                    {
+                                        keyId: myPreKey2.keyId,
+                                        publicKey: arraybuffer_to_string(myPreKey2.keyPair.pubKey)
+                                    }
+                                ],
+                                signedPreKey: {
+                                    keyId: mySignedPreKey.keyId,
+                                    publicKey: arraybuffer_to_string(mySignedPreKey.keyPair.pubKey),
+                                    signature: arraybuffer_to_string(mySignedPreKey.signature)
+                                }
+                            };
+                            console.log(config);
+                            post('pre_keys_bundle', config, () => console.log("Done!"));
+                        });
+                    });
                 });
             });
         }
