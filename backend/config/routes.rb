@@ -40,5 +40,8 @@ Rails.application.routes.draw do
     get 'profile', to: 'profile#show'
 
     post 'pre_keys_bundle', to: 'prekeys_bundle#save_prekeys_bundle'
+    get 'pre_keys_bundle', to: 'prekeys_bundle#send_prekeys_bundle_info'
+
+
   end
 end
