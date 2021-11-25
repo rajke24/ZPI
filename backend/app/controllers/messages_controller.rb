@@ -16,6 +16,9 @@ class MessagesController < ApplicationController
     message = Message.where(receiver_id: [destination_user.id, current_user.id], sender_id: [destination_user.id, current_user.id]).order(:sent_at).last
 
     ActionCable.server.broadcast('messages', { message: message })
+
+    render json: {status: :ok, message_id: message.id}
+
   end
 
   def find_waiting_messages
