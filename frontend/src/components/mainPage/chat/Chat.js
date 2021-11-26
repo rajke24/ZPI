@@ -20,30 +20,54 @@ const Chat = () => {
     const params = useParams();
     const conversation = useLiveQuery(() => db.conversations.get({sender_id: profile.id, name: params.name}), [params.name])
 
+    const getDecryptionMethod = (ciphertext, sender_id, protocol_store) => {
+        const receiverAddress = new window.libsignal.SignalProtocolAddress(sender_id.toString(), 1);
+        const sessionCipher = new window.libsignal.SessionCipher(protocol_store, receiverAddress);
+
+        if(ciphertext.type === 3) {
+            return sessionCipher.decryptPreKeyWhisperMessage;
+        } else if(ciphertext.type === 1) {
+            return sessionCipher.decryptWhisperMessage;
+        } else {
+            console.error("Unknown ciphertext type! Type: " + ciphertext.type);
+        }
+    };
+
+    const decryptMessage = (protocol_store, message) => {
+        return new Promise((resolve, reject) => {
+            const ciphertext = JSON.parse(message.content);
+            let decryptionMethod = getDecryptionMethod(ciphertext, message.sender_id, protocol_store);
+            decryptionMethod(ciphertext.body, 'binary').then(newPlaintext => {
+                let decryptedMessage = new TextDecoder('utf-8').decode(newPlaintext);
+                resolve(decryptedMessage);
+            });
+        });
+    };
+
+    const saveReceivedMessage = (myId, decryptedMessage, message) => {
+        message.content = decryptedMessage;
+        db.conversations.where({sender_id: myId, 'receiver.id': message.sender_id}).modify(c => c.messages.push(message));
+        myProtocolStore.save(profile.id);
+    };
+
     useEffect(() => {
         MessagesChannel.received = data => {
+
             const message = {...data.message, message_type: data.message.sender_id === profile.id ? 'sent' : 'received'}
             if(message.receiver_id !== profile.id) {
-                console.log("Received message where I am not a receiver so skipped it");
+                console.log("Received message not for me so skipping!");
                 return;
             }
-            const sessionCipher = new window.libsignal.SessionCipher(myProtocolStore, new window.libsignal.SignalProtocolAddress(message.sender_id.toString(), 1));
-            const ciphertext = JSON.parse(message.content);
-
-            let decryptionMethod;
-            if(ciphertext.type === 3) {
-                decryptionMethod = sessionCipher.decryptPreKeyWhisperMessage;
-            } else if(ciphertext.type === 1) {
-                decryptionMethod = sessionCipher.decryptWhisperMessage;
-            } else {
-                console.error("Unknown ciphertext type! Type: " + ciphertext.type);
-                return;
-            }
-            decryptionMethod(ciphertext.body, 'binary').then(newPlaintext => {
-                message.content = new TextDecoder('utf-8').decode(newPlaintext);
-                db.conversations.where({sender_id: profile.id, 'receiver.id': message.sender_id}).modify(c => c.messages.push(message));
-                myProtocolStore.save(profile.id);
-            });
+            console.log("Received message for me");
+            ensureProtocolStore(profile.id)
+                .then(_ => {
+                    return ensureIdentityKeys(myProtocolStore)
+                }).then(_ => {
+                    return decryptMessage(myProtocolStore, message)
+                }).then(decryptedMessage => {
+                    saveReceivedMessage(profile.id, decryptedMessage, message)
+                    console.log("Finished decrypting message!");
+                })
         }
     }, [params.name])
 
@@ -55,7 +79,7 @@ const Chat = () => {
         return new Uint8Array(JSON.parse(string)).buffer;
     }
 
-    const getProtocolStore = (user) => {
+    const ensureProtocolStore = (user) => {
         return new Promise((resolve, reject) => {
             if(myProtocolStore === undefined) {
                 console.log("No store! Loading from memory")
@@ -254,7 +278,7 @@ const Chat = () => {
                 device_id: 1 //TODO
             };
 
-            getProtocolStore(sender)
+            ensureProtocolStore(sender)
                 .then(_ => {
                     return ensureIdentityKeys(myProtocolStore);
                 }).then(_ => {
