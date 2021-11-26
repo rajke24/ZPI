@@ -186,10 +186,10 @@ SignalProtocolStore.load = function(user_id) {
         db.userData.get({user_id: user_id}).then(result => {
             if(result === undefined) {
                 console.log("No store in memory! Creating new one...")
-               resolve(new SignalProtocolStore());
+                resolve(new SignalProtocolStore());
             } else {
                 console.log("Store from memory OK");
-               resolve(createFromMemory(result));
+                resolve(createFromMemory(result));
             }
         });
     });
