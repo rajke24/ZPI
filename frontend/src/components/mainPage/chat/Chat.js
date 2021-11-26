@@ -6,11 +6,11 @@ import {get, post, save} from "../../../shared/ApiClientBuilder";
 import MessagesChannel from '../../../channels/messages_channel'
 import {useSelector} from "react-redux";
 import {useLiveQuery} from "dexie-react-hooks";
-import db from '../../../storage/db';
+import db, {createUser} from '../../../storage/db';
 import {useParams} from "react-router";
 import Conversations from "../conversations/Conversations";
 import Avatar from "../../../common/avatar/Avatar";
-import SignalProtocolStore from "../../../common/InMemorySignalProtocolStore";
+import SignalProtocolStore from "../../../common/MySignalProtocolStore";
 
 let myProtocolStore;
 
@@ -86,8 +86,8 @@ const Chat = () => {
                             const myRegistrationId = 1; //TODO
 
                             myProtocolStore = new SignalProtocolStore();
-                            myProtocolStore.put('identityKey', myIdentityKeyPair);
-                            myProtocolStore.put('registrationId', myRegistrationId);
+                            myProtocolStore.setIdentityKeyPair(myIdentityKeyPair);
+                            myProtocolStore.setLocalRegistrationId(myRegistrationId);
                             myProtocolStore.storePreKey(myPreKey.keyId, myPreKey).then(() => {
                                myProtocolStore.storeSignedPreKey(mySignedPreKey.keyId, mySignedPreKey).then(() => {
                                    let my_prekey_bundle_data = {
@@ -109,6 +109,16 @@ const Chat = () => {
                                        }
                                    };
                                    post('pre_keys_bundle', my_prekey_bundle_data, () => console.log("Prekey sent!"));
+
+                                   let identityKeyStringVersion = {
+                                        privKey: arraybuffer_to_string(myIdentityKeyPair.privKey),
+                                        pubKey:arraybuffer_to_string(myIdentityKeyPair.pubKey)
+                                   };
+                                   createUser(profile.id, myRegistrationId, identityKeyStringVersion).then(() => {
+                                       db.userData.get({user_id: profile.id}).then((result) => {
+                                          console.log(result);
+                                       });
+                                   });
                                });
                             });
                         });
@@ -136,6 +146,11 @@ const Chat = () => {
                 let sessionBuilder = new window.libsignal.SessionBuilder(myProtocolStore, receiverAddress);
                 sessionBuilder.processPreKey(receivedPreKeyBundle).then(() => {
                     console.log("Prekey processed!");
+                    myProtocolStore.save(profile.id).then(() => {
+                        db.userData.get({user_id: profile.id}).then(result => {
+                           console.log(result);
+                        });
+                    });
                 });
 
             });
@@ -175,7 +190,7 @@ const Chat = () => {
                         PreKeys send
                     </button>
                 </div>
-                <div classname='get_prekeys'>
+                <div className='get_prekeys'>
                     <button onClick={actions.getPreKeys}>
                         PreKeys get
                     </button>
