@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './Chat.scss';
 import Message from "./Message";
 import Icon, {sendIcon} from "../../../common/icons/Icon";
-import {save} from "../../../shared/ApiClientBuilder";
+import {get, post, save} from "../../../shared/ApiClientBuilder";
 import MessagesChannel from '../../../channels/messages_channel'
 import {useSelector} from "react-redux";
 import {useLiveQuery} from "dexie-react-hooks";
@@ -10,6 +10,10 @@ import db from '../../../storage/db';
 import {useParams} from "react-router";
 import Conversations from "../conversations/Conversations";
 import Avatar from "../../../common/avatar/Avatar";
+import SignalProtocolStore from "../../../common/MySignalProtocolStore";
+import LibsignalHelper from "../../../common/LibsignalHelper";
+
+let myProtocolStore;
 
 const Chat = () => {
     const [currentMessage, setCurrentMessage] = useState('');
@@ -18,20 +22,55 @@ const Chat = () => {
     const conversation = useLiveQuery(() => db.conversations.get({sender_id: profile.id, name: params.name}), [params.name])
 
     useEffect(() => {
+        ensureProtocolStore({id: profile.id}).then(() => {
+            // noinspection JSIgnoredPromiseFromCall
+            LibsignalHelper.ensureIdentityKeys(myProtocolStore);
+        });
         MessagesChannel.received = data => {
-            const message = {...data.message, message_type: data.message.sender_id === profile.id ? 'sent' : 'received'}
-            const otherUserId = profile.id === message.receiver_id ? message.sender_id : message.receiver_id
-            db.conversations.where({sender_id: profile.id, 'receiver.id': otherUserId}).modify(c => c.messages.push(message))
+            console.log("Received message!");
+            ensureProtocolStore({id: profile.id}).then(_ => {
+                // noinspection JSIgnoredPromiseFromCall
+                LibsignalHelper.onDataReceived(data, profile.id, myProtocolStore)
+            });
         }
     }, [params.name])
+    
+    const ensureProtocolStore = (user) => {
+        return new Promise((resolve, reject) => {
+            if(myProtocolStore === undefined) {
+                console.log("No store! Loading from memory")
+                SignalProtocolStore.load(user.id).then(protocolStore => {
+                    myProtocolStore = protocolStore;
+                    resolve();
+                });
+            } else {
+                console.log("Store OK");
+                resolve();
+            }
+        });
+    };
 
     const actions = {
-        sendMessage: () => save('messages/save_message', 'POST', {
-            content: currentMessage,
-            receiver_id: conversation.receiver.id,
-            sent_at: new Date(),
-            type: 'type'
-        }, () => setCurrentMessage('')),
+        sendMessage: () => {
+            console.log("Started sending process!");
+            const sender = {
+                id: profile.id + '.' + 1,
+                user_id: profile.id,
+                device_id: 1, //TODO
+            };
+            const receiver = {
+                id: conversation.receiver.id + '.' + 1,
+                user_id: conversation.receiver.id,
+                device_id: 1 //TODO
+            };
+            ensureProtocolStore(sender)
+                .then(_ => {
+                    return LibsignalHelper.sendMessage(currentMessage, myProtocolStore, sender, receiver)
+                })
+                .then(_ => {
+                    setCurrentMessage('');
+                });
+        }
     }
 
     const onEnterPress = (e) => {
