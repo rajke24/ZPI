@@ -21,8 +21,11 @@ const Chat = () => {
     const params = useParams();
     const conversation = useLiveQuery(() => db.conversations.get({sender_id: profile.id, name: params.name}), [params.name])
 
-
     useEffect(() => {
+        ensureProtocolStore({id: profile.id}).then(() => {
+            // noinspection JSIgnoredPromiseFromCall
+            LibsignalHelper.ensureIdentityKeys(myProtocolStore);
+        });
         MessagesChannel.received = data => {
             console.log("Received message!");
             ensureProtocolStore({id: profile.id}).then(_ => {
@@ -31,8 +34,7 @@ const Chat = () => {
             });
         }
     }, [params.name])
-
-
+    
     const ensureProtocolStore = (user) => {
         return new Promise((resolve, reject) => {
             if(myProtocolStore === undefined) {
@@ -47,10 +49,6 @@ const Chat = () => {
             }
         });
     };
-
-    function arraybuffer_to_string(arraybuffer) {
-        return JSON.stringify(Array.from(new Uint8Array(arraybuffer)))
-    }
 
     const actions = {
         sendMessage: () => {
@@ -72,44 +70,6 @@ const Chat = () => {
                 .then(_ => {
                     setCurrentMessage('');
                 });
-        },
-        sendPreKeys: () => {
-            window.libsignal.KeyHelper.generateIdentityKeyPair().then(myIdentityKeyPair => {
-                window.libsignal.KeyHelper.generatePreKey(1).then(myPreKey => {
-                    window.libsignal.KeyHelper.generatePreKey(2).then(myPreKey2 => {
-                        window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
-                            const myRegistrationId = 1; //TODO
-
-                            myProtocolStore = new SignalProtocolStore();
-                            myProtocolStore.setIdentityKeyPair(myIdentityKeyPair);
-                            myProtocolStore.setLocalRegistrationId(myRegistrationId);
-                            myProtocolStore.storePreKey(myPreKey.keyId, myPreKey).then(() => {
-                               myProtocolStore.storeSignedPreKey(mySignedPreKey.keyId, mySignedPreKey).then(() => {
-                                   let my_prekey_bundle_data = {
-                                       identityKey: arraybuffer_to_string(myIdentityKeyPair.pubKey),
-                                       preKeys: [
-                                           {
-                                               keyId: myPreKey.keyId,
-                                               publicKey: arraybuffer_to_string(myPreKey.keyPair.pubKey)
-                                           },
-                                           {
-                                               keyId: myPreKey2.keyId,
-                                               publicKey: arraybuffer_to_string(myPreKey2.keyPair.pubKey)
-                                           }
-                                       ],
-                                       signedPreKey: {
-                                           keyId: mySignedPreKey.keyId,
-                                           publicKey: arraybuffer_to_string(mySignedPreKey.keyPair.pubKey),
-                                           signature: arraybuffer_to_string(mySignedPreKey.signature)
-                                       }
-                                   };
-                                   post('pre_keys_bundle', my_prekey_bundle_data, () => console.log("Prekey sent!"));
-                               });
-                            });
-                        });
-                    });
-                });
-            });
         }
     }
 
@@ -139,11 +99,6 @@ const Chat = () => {
                     <button onClick={actions.sendMessage}>
                         Send
                         <Icon icon={sendIcon}/>
-                    </button>
-                </div>
-                <div className='send_prekeys'>
-                    <button onClick={actions.sendPreKeys}>
-                        PreKeys send
                     </button>
                 </div>
             </div>}

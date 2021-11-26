@@ -6,7 +6,7 @@ function LibsignalHelper() {
 }
 
 //region Ensuring stuff
-function ensureIdentityKeys(protocol_store) {
+LibsignalHelper.ensureIdentityKeys = function(protocol_store) {
     return new Promise((resolve, reject) => {
         if(protocol_store.myIdentityKeyPair === undefined) {
             console.log("no identity key!");
@@ -146,7 +146,7 @@ LibsignalHelper.onDataReceived = function(data, profileId, protocolStore) {
             return;
         }
         console.log("Message is for me so decrypting!");
-        ensureIdentityKeys(protocolStore)
+        LibsignalHelper.ensureIdentityKeys(protocolStore)
             .then(_ => {
                 return decryptMessage(protocolStore, message)
             })
@@ -195,7 +195,7 @@ function saveReceivedMessage (myId, decryptedMessage, message, protocolStore) {
 //make sure to call ensureProtocolStore() before calling this function!
 LibsignalHelper.sendMessage = function(plaintextMessage, protocolStore, sender, receiver) {
     return new Promise((resolve, reject) => {
-        ensureIdentityKeys(protocolStore).then(_ => {
+        LibsignalHelper.ensureIdentityKeys(protocolStore).then(_ => {
             return ensureSession(protocolStore, receiver);
         }).then(_ => {
             return encryptMessage(protocolStore, receiver, plaintextMessage);
