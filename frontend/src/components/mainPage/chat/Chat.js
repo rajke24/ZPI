@@ -55,11 +55,11 @@ const Chat = () => {
         return new Uint8Array(JSON.parse(string)).buffer;
     }
 
-    const getProtocolStore = (user_id) => {
+    const getProtocolStore = (user) => {
         return new Promise((resolve, reject) => {
             if(myProtocolStore === undefined) {
                 console.log("No store! Loading from memory")
-                SignalProtocolStore.load(user_id).then(protocolStore => {
+                SignalProtocolStore.load(user.id).then(protocolStore => {
                     myProtocolStore = protocolStore;
                     resolve();
                 });
@@ -153,12 +153,12 @@ const Chat = () => {
         });
     };
 
-    const ensureSession = (protocol_store, receiver_id) => {
+    const ensureSession = (protocol_store, receiver) => {
         return new Promise((resolve, reject) => {
-            protocol_store.loadSession(receiver_id).then(session => {
+            protocol_store.loadSession(receiver.id).then(session => {
                if(session === undefined) {
                    console.log("No session! Creating new one...")
-                   createSession(protocol_store, receiver_id).then(() => {
+                   createSession(protocol_store, receiver.id).then(() => {
                       resolve();
                    });
                } else {
@@ -196,9 +196,9 @@ const Chat = () => {
         });
     };
 
-    const encryptMessage = (protocol_store, receiver_id) => {
+    const encryptMessage = (protocol_store, receiver) => {
         return new Promise((resolve, reject) => {
-            let receiverAddress = new window.libsignal.SignalProtocolAddress(conversation.receiver.id.toString(), 1);
+            let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id, receiver.device_id);
             let sessionCipher = new window.libsignal.SessionCipher(protocol_store, receiverAddress);
             sessionCipher.encrypt(currentMessage).then(ciphertext => {
                 resolve(ciphertext);
@@ -206,12 +206,12 @@ const Chat = () => {
         });
     };
 
-    const sendMessageToServer = (ciphertext, receiver_id) => {
+    const sendMessageToServer = (ciphertext, receiver) => {
         return new Promise((resolve, reject) => {
             let currentDate = new Date();
             save('messages/save_message', 'POST', {
                 content: JSON.stringify(ciphertext),
-                receiver_id: conversation.receiver.id,
+                receiver_id: receiver.user_id,
                 sent_at: currentDate,
                 type: 'type'
             }, (params) => {
@@ -224,14 +224,14 @@ const Chat = () => {
         });
     }
 
-    const saveSendMessage = (message_params, receiver_id, sender_id) => {
+    const saveSendMessage = (message_params, receiver, sender) => {
         return new Promise((resolve, reject) => {
             let message = {
                 content: currentMessage,
                 id: message_params.message_id,
                 message_type: 'sent',
-                receiver_id: receiver_id,
-                sender_id: sender_id,
+                receiver_id: receiver.user_id,
+                sender_id: sender.user_id,
                 send_at: message_params.send_at
             };
             db.conversations.where({sender_id: message.sender_id, 'receiver.id': message.receiver_id}).modify(c => c.messages.push(message));
@@ -243,21 +243,30 @@ const Chat = () => {
     const actions = {
         sendMessage: () => {
             console.log("Started sending process!");
-            let senderId = profile.id.toString() + ".1";
-            let receiverId = conversation.receiver.id.toString() + ".1"
-            getProtocolStore(senderId)
+            const sender = {
+                id: profile.id + '.' + 1,
+                user_id: profile.id,
+                device_id: 1, //TODO
+            };
+            const receiver = {
+                id: conversation.receiver.id + '.' + 1,
+                user_id: conversation.receiver.id,
+                device_id: 1 //TODO
+            };
+
+            getProtocolStore(sender)
                 .then(_ => {
                     return ensureIdentityKeys(myProtocolStore);
                 }).then(_ => {
-                    return ensureSession(myProtocolStore, receiverId);
+                    return ensureSession(myProtocolStore, receiver);
                 }).then(_ => {
-                    return encryptMessage(myProtocolStore, receiverId);
+                    return encryptMessage(myProtocolStore, receiver);
                 }).then(ciphertext => {
-                    return sendMessageToServer(ciphertext, receiverId)
+                    return sendMessageToServer(ciphertext, receiver)
                 }).then(messageParams => {
-                    return saveSendMessage(messageParams, conversation.receiver.id, profile.id)
+                    return saveSendMessage(messageParams, receiver, sender)
                 }).then(_ => {
-                    myProtocolStore.save(profile.id);
+                    myProtocolStore.save(sender.user_id);
                     setCurrentMessage('');
                     console.log("Finished sending process!");
                 });
