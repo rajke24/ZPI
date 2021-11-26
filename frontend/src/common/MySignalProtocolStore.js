@@ -119,35 +119,6 @@ SignalProtocolStore.prototype = {
         return new ByteBuffer.wrap(thing).toString('binary');
     },
     save: async function(user_id) {
-        /*let preKeys = {};
-        for(const [key, value] of Object.entries(this.myPreKeys)) {
-            preKeys[key] = this.preKeyToString(value);
-        }
-
-        let signedPreKeys = {};
-        for(const [key, value] of Object.entries(this.mySignedPreKeys)) {
-            signedPreKeys[key] = this.signedPreKeyToString(value);
-        }
-
-        let sessions = {};
-        for(const [key, value] of Object.entries(this.sessions)) {
-            sessions[key] = value;
-        }
-
-        let identityKeys = {};
-        for(const [key, value] of Object.entries(this.identityKeys)) {
-            identityKeys[key] = value;
-        }*/
-
-        /*await db.userData.put({
-            user_id: user_id,
-            registration_id: this.myRegistrationId,
-            my_identity_key: this.identityKeyToString(this.myIdentityKeyPair),
-            preKeys: preKeys,
-            identity_keys: identityKeys,
-            signed_prekeys: signedPreKeys,
-            sessions: sessions
-        })*/
         await db.userData.put({
             user_id: user_id,
             registration_id: this.myRegistrationId,
@@ -208,6 +179,31 @@ SignalProtocolStore.prototype = {
             signature: string_to_arraybuffer(signedPreKey.signature)
         }
     },
+}
+
+SignalProtocolStore.load = function(user_id) {
+    return new Promise((resolve, _) => {
+        db.userData.get({user_id: user_id}).then(result => {
+            if(result === undefined) {
+                console.log("No store in memory! Creating new one...")
+               resolve(new SignalProtocolStore());
+            } else {
+                console.log("Store from memory OK");
+               resolve(createFromMemory(result));
+            }
+        });
+    });
+}
+
+function createFromMemory(recordFromMemory) {
+    let signalProtocolStore = new SignalProtocolStore();
+    signalProtocolStore.myIdentityKeyPair = recordFromMemory.my_identity_key;
+    signalProtocolStore.myRegistrationId = recordFromMemory.registration_id;
+    signalProtocolStore.identityKeys = recordFromMemory.identity_keys;
+    signalProtocolStore.myPreKeys = recordFromMemory.preKeys;
+    signalProtocolStore.mySignedPreKeys = recordFromMemory.signed_prekeys;
+    signalProtocolStore.sessions = recordFromMemory.sessions;
+    return signalProtocolStore;
 }
 
 export default SignalProtocolStore;

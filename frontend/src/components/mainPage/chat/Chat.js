@@ -42,6 +42,7 @@ const Chat = () => {
             decryptionMethod(ciphertext.body, 'binary').then(newPlaintext => {
                 message.content = new TextDecoder('utf-8').decode(newPlaintext);
                 db.conversations.where({sender_id: profile.id, 'receiver.id': message.sender_id}).modify(c => c.messages.push(message));
+                myProtocolStore.save(profile.id);
             });
         }
     }, [params.name])
@@ -54,29 +55,212 @@ const Chat = () => {
         return new Uint8Array(JSON.parse(string)).buffer;
     }
 
+    const getProtocolStore = (user_id) => {
+        return new Promise((resolve, reject) => {
+            if(myProtocolStore === undefined) {
+                console.log("No store! Loading from memory")
+                SignalProtocolStore.load(user_id).then(protocolStore => {
+                    myProtocolStore = protocolStore;
+                    resolve();
+                });
+            } else {
+                console.log("Store OK");
+                resolve();
+            }
+        });
+    };
+
+    const ensureIdentityKeys = (protocol_store) => {
+      return new Promise((resolve, reject) => {
+         if(protocol_store.myIdentityKeyPair === undefined) {
+             console.log("no identity key!");
+             createUserKeys()
+                 .then(generatedUserKeys => {
+                    return storeUserKeys(protocol_store, generatedUserKeys);
+                }).then((generatedUserKeys) => {
+                    return sendUserKeysToServer(generatedUserKeys)
+                }).then(() => {
+                    console.log("Finished creating identity keys!");
+                    resolve();
+                });
+         } else {
+             console.log("Identity key OK")
+             resolve();
+         }
+      });
+    };
+
+    const createUserKeys = () => {
+        return new Promise((resolve, reject) => {
+            window.libsignal.KeyHelper.generateIdentityKeyPair().then(myIdentityKeyPair => {
+                window.libsignal.KeyHelper.generatePreKey(1).then(myPreKey => {
+                    window.libsignal.KeyHelper.generatePreKey(2).then(myPreKey2 => {
+                        window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
+                            const registrationId = 1; //TODO
+                            resolve({
+                                registrationId: registrationId,
+                                identityKeyPair: myIdentityKeyPair,
+                                preKeys: [
+                                    myPreKey,
+                                    myPreKey2
+                                ],
+                                signedPreKey: mySignedPreKey
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    };
+
+    const storeUserKeys = (protocol_store, generatedUserKeys) => {
+        return new Promise((resolve, reject) => {
+            console.log("Storing identity keys!");
+            protocol_store.setIdentityKeyPair(generatedUserKeys.identityKeyPair);
+            protocol_store.setLocalRegistrationId(generatedUserKeys.registrationId);
+            protocol_store.storePreKey(generatedUserKeys.preKeys[0].keyId, generatedUserKeys.preKeys[0]).then(() => {
+                protocol_store.storeSignedPreKey(generatedUserKeys.signedPreKey.keyId, generatedUserKeys.signedPreKey).then(() => {
+                    resolve(generatedUserKeys);
+                });
+            });
+        });
+    }
+
+    const sendUserKeysToServer = (generatedUserKeys) => {
+        return new Promise((resolve, reject) => {
+            let prekey_bundle_data = {
+                identityKey: arraybuffer_to_string(generatedUserKeys.identityKeyPair.pubKey),
+                preKeys: [
+                    {
+                        keyId: generatedUserKeys.preKeys[0].keyId,
+                        publicKey: arraybuffer_to_string(generatedUserKeys.preKeys[0].keyPair.pubKey)
+                    },
+                    {
+                        keyId: generatedUserKeys.preKeys[1].keyId,
+                        publicKey: arraybuffer_to_string(generatedUserKeys.preKeys[1].keyPair.pubKey)
+                    }
+                ],
+                signedPreKey: {
+                    keyId: generatedUserKeys.signedPreKey.keyId,
+                    publicKey: arraybuffer_to_string(generatedUserKeys.signedPreKey.keyPair.pubKey),
+                    signature: arraybuffer_to_string(generatedUserKeys.signedPreKey.signature)
+                }
+            };
+            post('pre_keys_bundle', prekey_bundle_data, () => {
+                console.log("Prekey bundle data sent!");
+                resolve();
+            });
+        });
+    };
+
+    const ensureSession = (protocol_store, receiver_id) => {
+        return new Promise((resolve, reject) => {
+            protocol_store.loadSession(receiver_id).then(session => {
+               if(session === undefined) {
+                   console.log("No session! Creating new one...")
+                   createSession(protocol_store, receiver_id).then(() => {
+                      resolve();
+                   });
+               } else {
+                   console.log("Session OK");
+                   resolve();
+               }
+            });
+        });
+    };
+
+    const createSession = (protocol_store, receiver_id) => {
+        return new Promise((resolve, reject) => {
+            get("/pre_keys_bundle/", {id: receiver_id}, (result) => {
+                let receivedPreKeyBundle = {
+                    registrationId: 1, //TODO
+                    identityKey: string_to_arraybuffer(result.identity_key),
+                    preKey: {
+                        keyId: result.prekey.keyId,
+                        publicKey: string_to_arraybuffer(result.prekey.publicKey)
+                    },
+                    signedPreKey: {
+                        keyId: result.signed_key.keyId,
+                        publicKey: string_to_arraybuffer(result.signed_key.publicKey),
+                        signature: string_to_arraybuffer(result.signed_key.signature)
+                    }
+                };
+
+                let receiverAddress = new window.libsignal.SignalProtocolAddress(conversation.receiver.id.toString(), 1);
+                let sessionBuilder = new window.libsignal.SessionBuilder(protocol_store, receiverAddress);
+                sessionBuilder.processPreKey(receivedPreKeyBundle).then(() => {
+                    console.log("New session created!");
+                    resolve();
+                });
+            });
+        });
+    };
+
+    const encryptMessage = (protocol_store, receiver_id) => {
+        return new Promise((resolve, reject) => {
+            let receiverAddress = new window.libsignal.SignalProtocolAddress(conversation.receiver.id.toString(), 1);
+            let sessionCipher = new window.libsignal.SessionCipher(protocol_store, receiverAddress);
+            sessionCipher.encrypt(currentMessage).then(ciphertext => {
+                resolve(ciphertext);
+            });
+        });
+    };
+
+    const sendMessageToServer = (ciphertext, receiver_id) => {
+        return new Promise((resolve, reject) => {
+            let currentDate = new Date();
+            save('messages/save_message', 'POST', {
+                content: JSON.stringify(ciphertext),
+                receiver_id: conversation.receiver.id,
+                sent_at: currentDate,
+                type: 'type'
+            }, (params) => {
+                console.log("Message sent!");
+                resolve({
+                    message_id: params.message_id,
+                    send_at: currentDate
+                });
+            });
+        });
+    }
+
+    const saveSendMessage = (message_params, receiver_id, sender_id) => {
+        return Promise.resolve((resolve, reject) => {
+            let message = {
+                content: currentMessage,
+                id: message_params.message_id,
+                message_type: 'sent',
+                receiver_id: receiver_id,
+                sender_id: sender_id,
+                send_at: message_params.send_at
+            };
+            db.conversations.where({sender_id: message.sender_id, 'receiver.id': message.receiver.id}).modify(c => c.messages.push(message));
+            console.log("Saved!");
+            resolve();
+        });
+    }
+
     const actions = {
         sendMessage: () => {
-            const sessionCipher = new window.libsignal.SessionCipher(myProtocolStore, new window.libsignal.SignalProtocolAddress(conversation.receiver.id.toString(), 1));
-            sessionCipher.encrypt(currentMessage).then(ciphertext => {
-                let date = new Date()
-                save('messages/save_message', 'POST', {
-                    content: JSON.stringify(ciphertext),
-                    receiver_id: conversation.receiver.id,
-                    sent_at: date,
-                    type: 'type'
-               }, (params) => {
-                    let sent_message = {
-                        content: currentMessage,
-                        id: params.message_id,
-                        message_type: 'sent',
-                        receiver_id: conversation.receiver.id,
-                        sender_id: profile.id,
-                        send_at: date
-                    };
-                    db.conversations.where({sender_id: profile.id, 'receiver.id': conversation.receiver.id}).modify(c => c.messages.push(sent_message));
+            console.log("Started sending process!");
+            let senderId = profile.id.toString() + ".1";
+            let receiverId = conversation.receiver.id.toString() + ".1"
+            getProtocolStore(senderId)
+                .then(_ => {
+                    return ensureIdentityKeys(myProtocolStore);
+                }).then(_ => {
+                    return ensureSession(myProtocolStore, receiverId);
+                }).then(_ => {
+                    return encryptMessage(myProtocolStore, receiverId);
+                }).then(ciphertext => {
+                    return sendMessageToServer(ciphertext, receiverId)
+                }).then(messageParams => {
+                    return saveSendMessage(messageParams, receiverId, senderId)
+                }).then(_ => {
+                    myProtocolStore.save(profile.id);
                     setCurrentMessage('');
-               })
-            });
+                    console.log("Finished sending process!");
+                });
         },
         sendPreKeys: () => {
             window.libsignal.KeyHelper.generateIdentityKeyPair().then(myIdentityKeyPair => {
@@ -114,45 +298,11 @@ const Chat = () => {
                                         privKey: arraybuffer_to_string(myIdentityKeyPair.privKey),
                                         pubKey:arraybuffer_to_string(myIdentityKeyPair.pubKey)
                                    };
-                                   createUser(profile.id, myRegistrationId, identityKeyStringVersion).then(() => {
-                                       db.userData.get({user_id: profile.id}).then((result) => {
-                                          console.log(result);
-                                       });
-                                   });
                                });
                             });
                         });
                     });
                 });
-            });
-        },
-        getPreKeys: () => {
-            get("/pre_keys_bundle/", {id: conversation.receiver.id}, (result) => {
-                let receivedPreKeyBundle = {
-                    registrationId: 1, //TODO
-                    identityKey: string_to_arraybuffer(result.identity_key),
-                    preKey: {
-                        keyId: result.prekey.keyId,
-                        publicKey: string_to_arraybuffer(result.prekey.publicKey)
-                    },
-                    signedPreKey: {
-                        keyId: result.signed_key.keyId,
-                        publicKey: string_to_arraybuffer(result.signed_key.publicKey),
-                        signature: string_to_arraybuffer(result.signed_key.signature)
-                    }
-                };
-                let receiverAddress = new window.libsignal.SignalProtocolAddress(conversation.receiver.id.toString(), 1);
-
-                let sessionBuilder = new window.libsignal.SessionBuilder(myProtocolStore, receiverAddress);
-                sessionBuilder.processPreKey(receivedPreKeyBundle).then(() => {
-                    console.log("Prekey processed!");
-                    myProtocolStore.save(profile.id).then(() => {
-                        db.userData.get({user_id: profile.id}).then(result => {
-                           console.log(result);
-                        });
-                    });
-                });
-
             });
         }
     }
@@ -188,11 +338,6 @@ const Chat = () => {
                 <div className='send_prekeys'>
                     <button onClick={actions.sendPreKeys}>
                         PreKeys send
-                    </button>
-                </div>
-                <div className='get_prekeys'>
-                    <button onClick={actions.getPreKeys}>
-                        PreKeys get
                     </button>
                 </div>
             </div>}
