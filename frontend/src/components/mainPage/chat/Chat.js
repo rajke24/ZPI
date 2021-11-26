@@ -225,7 +225,7 @@ const Chat = () => {
     }
 
     const saveSendMessage = (message_params, receiver_id, sender_id) => {
-        return Promise.resolve((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let message = {
                 content: currentMessage,
                 id: message_params.message_id,
@@ -234,8 +234,8 @@ const Chat = () => {
                 sender_id: sender_id,
                 send_at: message_params.send_at
             };
-            db.conversations.where({sender_id: message.sender_id, 'receiver.id': message.receiver.id}).modify(c => c.messages.push(message));
-            console.log("Saved!");
+            db.conversations.where({sender_id: message.sender_id, 'receiver.id': message.receiver_id}).modify(c => c.messages.push(message));
+            console.log("Saved my message!");
             resolve();
         });
     }
@@ -255,7 +255,7 @@ const Chat = () => {
                 }).then(ciphertext => {
                     return sendMessageToServer(ciphertext, receiverId)
                 }).then(messageParams => {
-                    return saveSendMessage(messageParams, receiverId, senderId)
+                    return saveSendMessage(messageParams, conversation.receiver.id, profile.id)
                 }).then(_ => {
                     myProtocolStore.save(profile.id);
                     setCurrentMessage('');
