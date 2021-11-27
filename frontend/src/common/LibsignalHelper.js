@@ -1,5 +1,5 @@
 import {get, post, save} from "../shared/ApiClientBuilder";
-import db from "../storage/db";
+import db, {createConversation} from "../storage/db";
 
 function LibsignalHelper() {
 
@@ -132,6 +132,22 @@ function createSession(protocol_store, receiver) {
     });
 }
 
+function ensureConversation(profileId, otherUserId, receiver_email) {
+    return new Promise((resolve, reject) => {
+        db.conversations.get({sender_id: profileId, 'receiver.id': otherUserId}).then(result => {
+            if(result === undefined) {
+                console.log("No conversation, creating new one...");
+                createConversation({id: profileId}, {id: otherUserId, email: receiver_email}).then(_ => {
+                    resolve();
+                });
+            } else {
+                console.log("Conversation OK");
+                resolve();
+            }
+        });
+    });
+}
+
 //endregion
 
 //region Decrypting messages
@@ -151,9 +167,11 @@ LibsignalHelper.onDataReceived = function(data, profileId, protocolStore) {
                 return decryptMessage(protocolStore, message)
             })
             .then(decryptedMessage => {
-                saveReceivedMessage(profileId, decryptedMessage, message, protocolStore)
-                console.log("Finished decrypting message!");
-                resolve();
+                ensureConversation(profileId, message.sender_id, decryptedMessage.email).then(_ => {
+                    saveReceivedMessage(profileId, decryptedMessage, message, protocolStore)
+                    console.log("Finished decrypting message!");
+                    resolve();
+                });
             })
     });
 }
@@ -164,7 +182,13 @@ function decryptMessage(protocolStore, message) {
         let decryptionMethod = getDecryptionMethod(ciphertext, message.sender_id, protocolStore);
         decryptionMethod(ciphertext.body, 'binary').then(newPlaintext => {
             let decryptedMessage = new TextDecoder('utf-8').decode(newPlaintext);
-            resolve(decryptedMessage);
+            let emailEndPosition = decryptedMessage.search("/");
+
+            let toReturn = {
+                email: decryptedMessage.substr(0, emailEndPosition),
+                message: decryptedMessage.substr(emailEndPosition + 1)
+            }
+            resolve(toReturn);
         });
     });
 }
@@ -183,7 +207,7 @@ function getDecryptionMethod(ciphertext, senderId, protocolStore) {
 }
 
 function saveReceivedMessage (myId, decryptedMessage, message, protocolStore) {
-    message.content = decryptedMessage;
+    message.content = decryptedMessage.message;
     db.conversations.where({sender_id: myId, 'receiver.id': message.sender_id}).modify(c => c.messages.push(message));
     protocolStore.save(myId);
 }
@@ -198,7 +222,7 @@ LibsignalHelper.sendMessage = function(plaintextMessage, protocolStore, sender, 
         LibsignalHelper.ensureIdentityKeys(protocolStore).then(_ => {
             return ensureSession(protocolStore, receiver);
         }).then(_ => {
-            return encryptMessage(protocolStore, receiver, plaintextMessage);
+            return encryptMessage(protocolStore, sender, receiver, plaintextMessage);
         }).then(ciphertext => {
             return sendMessageToServer(ciphertext, receiver)
         }).then(messageParams => {
@@ -211,11 +235,13 @@ LibsignalHelper.sendMessage = function(plaintextMessage, protocolStore, sender, 
     });
 }
 
-function encryptMessage(protocolStore, receiver, message) {
+function encryptMessage(protocolStore, sender, receiver, message) {
+    let messageWithEmail = `${sender.email}/${message}`;
+
     return new Promise((resolve, reject) => {
         let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id, receiver.device_id);
         let sessionCipher = new window.libsignal.SessionCipher(protocolStore, receiverAddress);
-        sessionCipher.encrypt(message).then(ciphertext => {
+        sessionCipher.encrypt(messageWithEmail).then(ciphertext => {
             resolve(ciphertext);
         });
     });

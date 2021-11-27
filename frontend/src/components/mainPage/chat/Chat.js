@@ -57,6 +57,7 @@ const Chat = () => {
                 id: profile.id + '.' + 1,
                 user_id: profile.id,
                 device_id: 1, //TODO
+                email: profile.email
             };
             const receiver = {
                 id: conversation.receiver.id + '.' + 1,
