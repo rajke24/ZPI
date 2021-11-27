@@ -68,7 +68,7 @@ const Topbar = () => {
                 </form>}
                 {invitationSent && <FormFeedback success>Invitation sent!</FormFeedback>}
                 <button className='invite-btn' onClick={inviteButtonFunction}>{!showInviteInput || formik.values.invitee_email ? 'Invite new friend' : 'Hide'}</button>
-                <span>{profile.email}</span>
+                <span>{profile.username}</span>
                 <Avatar color='#000000' name={profile.email}/>
             </div>
         </div>

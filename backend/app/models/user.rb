@@ -10,6 +10,7 @@
 #  password_digest        :string           not null
 #  password_reset_sent_at :datetime
 #  password_reset_token   :string
+#  username               :string
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
 #
