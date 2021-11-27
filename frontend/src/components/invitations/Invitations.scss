@@ -1,33 +1,5 @@
 @import 'src/styles/variables';
 
 .invitations {
-  .tabs {
-    margin-bottom: 30px;
-
-
-    .tab {
-      background: transparent;
-      font-weight: 500;
-      font-size: 14px;
-      margin-right: 10px;
-      position: relative;
-      height: 28px;
-
-      &.active {
-        font-weight: 600;
-
-        &::after {
-          content: " ";
-          display: block;
-          background: $fuchsia-rose;
-          height: 4px;
-          width: 65%;
-          border-radius: 10px;
-
-          position: absolute;
-          bottom: 0;
-        }
-      }
-    }
-  }
+  
 }

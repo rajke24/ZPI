@@ -1,6 +1,8 @@
 import React from "react";
 import FormInput from "./FormInput";
 import {useFormik} from "formik";
+import FormAvatar from "./FormAvatar";
+import FormCheckbox from "./FormCheckbox";
 
 export function useDefaultFormik(props) {
     return useFormik({
@@ -18,6 +20,10 @@ export const buildFields = (fields, formik, validationSchema) => {
             case "input":
             case "password":
                 return <FormInput key={idx} {...props}/>
+            case "avatar":
+                return <FormAvatar key={idx} {...props} />
+            case "checkbox":
+                return <FormCheckbox key={idx} {...props} />
             default:
                 return 'Unknown type';
         }

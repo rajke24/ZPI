@@ -16,11 +16,11 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (receiver_id => users.id)
-#  fk_rails_...  (sender_id => users.id)
+#  fk_rails_...  (receiver_id => devices.id)
+#  fk_rails_...  (sender_id => devices.id)
 #
 class Message < ApplicationRecord
-  belongs_to :sender, class_name: "User"
-  belongs_to :receiver, class_name: "User"
+  belongs_to :sender, class_name: 'Device'
+  belongs_to :receiver, class_name: 'Device'
 
 end

@@ -11,7 +11,7 @@ import {useDispatch} from "react-redux";
 import {get, save} from "../../shared/ApiClientBuilder";
 import logo from '../../common/images/logo.svg';
 import {Link} from "react-router-dom";
-import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
+import Icon, {lockIcon, mailIcon} from "../../common/icon/Icon";
 import {doSave} from "../../common/form/FormHelpers";
 import FormFeedback from "../../common/form/FormFeedback";
 

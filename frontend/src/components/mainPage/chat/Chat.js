@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './Chat.scss';
 import Message from "./Message";
-import Icon, {sendIcon} from "../../../common/icons/Icon";
+import Icon, {sendIcon} from "../../../common/icon/Icon";
 import {get, post, save} from "../../../shared/ApiClientBuilder";
 import MessagesChannel from '../../../channels/messages_channel'
 import {useSelector} from "react-redux";

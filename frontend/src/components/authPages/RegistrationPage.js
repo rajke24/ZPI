@@ -8,7 +8,7 @@ import {useHistory} from "react-router";
 import {post} from "../../shared/ApiClientBuilder";
 import './AuthPages.scss';
 import logo from "../../common/images/logo.svg";
-import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
+import Icon, {lockIcon, mailIcon} from "../../common/icon/Icon";
 import {Link} from "react-router-dom";
 import {doSave} from "../../common/form/FormHelpers";
 

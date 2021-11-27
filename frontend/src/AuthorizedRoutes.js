@@ -2,10 +2,10 @@ import {Route} from "react-router-dom";
 import {matchPath} from "react-router";
 import Chat from "./components/mainPage/chat/Chat";
 import Invitations from "./components/invitations/Invitations";
+import Settings from "./components/settings/Settings";
 
 export const authorizedRoutes = [
-    // {path: '/contacts', component: Contacts},
-    // {path: '/profile', component: Profile},
+    {path: '/settings', component: Settings},
     {path: '/chat/:name?', component: Chat},
     {path: '/invitations', component: Invitations},
 ]

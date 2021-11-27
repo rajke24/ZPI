@@ -10,12 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_15_103727) do
+ActiveRecord::Schema.define(version: 2021_11_27_181436) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
+  create_table "devices", force: :cascade do |t|
+    t.string "identity_key"
+    t.json "prekeys"
+    t.json "signed_prekey"
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_devices_on_user_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -91,15 +99,13 @@ ActiveRecord::Schema.define(version: 2021_11_15_103727) do
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
     t.string "otp_secret_key"
-    t.string "identity_key"
-    t.json "prekeys"
-    t.json "signed_prekey"
   end
 
+  add_foreign_key "devices", "users", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "invitee_id"
   add_foreign_key "invitations", "users", column: "inviter_id"
-  add_foreign_key "messages", "users", column: "receiver_id"
-  add_foreign_key "messages", "users", column: "sender_id"
+  add_foreign_key "messages", "devices", column: "receiver_id"
+  add_foreign_key "messages", "devices", column: "sender_id"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"

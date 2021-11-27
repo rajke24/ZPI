@@ -6,13 +6,10 @@
 #  activated              :boolean
 #  activation_token       :string
 #  email                  :string           not null
-#  identity_key           :string
 #  otp_secret_key         :string
 #  password_digest        :string           not null
 #  password_reset_sent_at :datetime
 #  password_reset_token   :string
-#  prekeys                :json
-#  signed_prekey          :json
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
 #
@@ -34,11 +31,15 @@ class User < ApplicationRecord
            foreign_key: :resource_owner_id,
            dependent: :delete_all # or :destroy if you need callbacks
 
+  has_many :devices, dependent: :delete_all
+
   has_many :received_messages,
+           through: :devices,
            :foreign_key => "receiver_id",
            :class_name => "Message"
 
   has_many :sent_messages,
+           through: :devices,
            :foreign_key => "sender_id",
            :class_name => "Message"
 

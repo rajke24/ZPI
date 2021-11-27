@@ -1,0 +1,31 @@
+@import 'src/styles/variables';
+
+.avatar-dropzone {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border: 1px dashed $graphite;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    .delete-button {
+      display: block !important;
+    }
+  }
+
+  .delete-button {
+    min-width: unset;
+    display: none !important;
+    position: absolute;
+    left: calc(100% - 50px);
+    top: 10%;
+    z-index: 99;
+  }
+
+  .empty-avatar {
+    text-align: center;
+  }
+}

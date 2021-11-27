@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import logo from "../../common/images/logo.svg";
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
-import Icon, {lockIcon, mailIcon} from "../../common/icons/Icon";
+import Icon, {lockIcon, mailIcon} from "../../common/icon/Icon";
 import {defineMessages, useIntl} from "react-intl";
 import {useHistory, useParams} from "react-router";
 import * as Yup from "yup";

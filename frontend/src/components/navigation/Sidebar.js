@@ -1,7 +1,7 @@
 import React from 'react';
 import './Sidebar.scss';
 import {NavLink} from "react-router-dom";
-import Icon, {chatIcon, invitationsIcon, logoutIcon, settingsIcon} from "../../common/icons/Icon";
+import Icon, {chatIcon, invitationsIcon, logoutIcon, settingsIcon} from "../../common/icon/Icon";
 import {logout} from "../template/AppTemplateActions";
 import {useDispatch} from "react-redux";
 
