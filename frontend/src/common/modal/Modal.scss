@@ -1,0 +1,37 @@
+@import 'src/styles/variables';
+
+.modal-overlay {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .modal {
+    padding: 30px;
+    border-radius: 15px;
+    background: $white;
+
+    .modal-footer {
+      display: flex;
+      justify-content: right;
+
+      button {
+        margin-left: 15px;
+
+        &.cancel-btn {
+          background: $light-grey;
+
+          &:hover {
+            background: $graphite;
+          }
+        }
+      }
+    }
+  }
+}

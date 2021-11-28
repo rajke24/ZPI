@@ -11,6 +11,7 @@ import Avatar from "../avatar/Avatar";
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import {getCroppedImg} from "../utils";
+import Modal from "../modal/Modal";
 
 const messages = buildMessages(defineMessages({
     tapHere: {
@@ -31,8 +32,10 @@ const FormAvatar = ({value, label, name, crop, onChange}) => {
 
     const {formatMessage} = useIntl();
 
-    const uploadCroppedImage = async () => {
+    const uploadCroppedImage = async e => {
+        e.preventDefault()
         const croppedImg = await getCroppedImg(croppedImageElement, cropAspect, cropImage.fileName)
+        console.log(croppedImg)
         actions.upload([croppedImg], () => {
         }, file => {
             onChange(name, file);
@@ -64,7 +67,7 @@ const FormAvatar = ({value, label, name, crop, onChange}) => {
             <input {...getInputProps()} />
             {value ? <Avatar big url={value.small_url}/> : <div className="empty-avatar">
                 <b>{formatMessage(messages.tapHere)}</b>
-                <div>{formatMessage(messages.toUpload, {object: formatMessage(label)})}</div>
+                <div>{formatMessage(messages.toUpload, {object: label && formatMessage(label)})}</div>
             </div>
             }
             {value && <button onClick={onDelete} className="delete-button">
@@ -72,12 +75,7 @@ const FormAvatar = ({value, label, name, crop, onChange}) => {
             </button>}
         </div>
 
-        {cropImage && <div
-            isOpen
-            size="xl"
-            toggle={() => setCropImage(false)}
-        >
-
+        {cropImage && <Modal onSave={uploadCroppedImage} onCancel={() => setCropImage(null)}>
             <div>
                 <ReactCrop
                     src={cropImage.url}
@@ -89,11 +87,7 @@ const FormAvatar = ({value, label, name, crop, onChange}) => {
                     onChange={newCrop => setCropAspect(newCrop)}
                 />
             </div>
-            <div>
-                <button onClick={uploadCroppedImage}>Save</button>
-                <button onClick={() => setCropImage(null)}>Cancel</button>
-            </div>
-        </div>
+        </Modal>
         }
     </>
 };
