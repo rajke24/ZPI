@@ -37,10 +37,14 @@ const messages = buildMessages(defineMessages({
         id: 'RegistrationPage.alreadyHaveAccount.Text',
         defaultMessage: 'Already have an account ?'
     },
+    alreadyExists: {
+        id: 'RegistrationPage.AlreadyExists.Text',
+        defaultMessage: 'already exists'
+    }
 }));
 
 const validationSchema = Yup.object().shape({
-    email: addValidation({email: true, required: true, unique: '/check_email_uniqueness'}),
+    email: addValidation({email: true, required: true, serverSideValidation: {url: '/check_email_uniqueness', message: messages.alreadyExists}}),
     password: addValidation({required: true, min: 8, max: 255}),
     confirmPassword: addValidation({required: true, min: 8, max: 255, sameAs: 'password'}),
 })

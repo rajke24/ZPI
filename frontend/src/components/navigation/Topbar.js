@@ -9,9 +9,18 @@ import * as Yup from "yup";
 import {addValidation} from "../../common/form/FromSchemaBuilder";
 import {doSave} from "../../common/form/FormHelpers";
 import FormFeedback from "../../common/form/FormFeedback";
+import {buildMessages} from "../../common/commonMessages";
+import {defineMessages} from "react-intl";
+
+const messages = buildMessages(defineMessages({
+    invitationAlreadySent: {
+        id: 'Profile.InvitationAlreadySent.Label',
+        defaultMessage: 'Invitation already sent'
+    }
+}));
 
 const validationSchema = Yup.object().shape({
-    invitee_email: addValidation({email: true, required: true, unique: '/invitations/check'}),
+    invitee_email: addValidation({email: true, required: true, serverSideValidation: {url: '/invitations/check', message: messages.invitationAlreadySent}}),
 })
 
 const Topbar = () => {

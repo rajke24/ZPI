@@ -1,9 +1,14 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {buildFields, useDefaultFormik} from "../../common/form/FromItemBuilder";
 import {buildMessages} from "../../common/commonMessages";
 import {defineMessages} from "react-intl";
 import * as Yup from "yup";
 import {addValidation} from "../../common/form/FromSchemaBuilder";
+import {useDispatch, useSelector} from "react-redux";
+import {save} from "../../shared/ApiClientBuilder";
+import {doSave} from "../../common/form/FormHelpers";
+import {reloadProfile} from "../template/AppTemplateActions";
+import './Profile.scss';
 
 const messages = buildMessages(defineMessages({
     avatar: {
@@ -29,26 +34,43 @@ const messages = buildMessages(defineMessages({
     newPasswordConfirm: {
         id: 'Profile.NewPasswordConfirm.Label',
         defaultMessage: 'Confirm new password'
-    },
+    }
 }));
 
 const validationSchema = Yup.object().shape({
-    email: addValidation({email: true, required: true}),
+    username: addValidation({required: true, min: 3, max: 50}),
+    current_password: addValidation({required: true, min: 8, max: 255, conditional: 'change_password', serverSideValidation: {url: '/profile/validate_password', message: 'invalid'}}),
+    password: addValidation({required: true, min: 8, max: 255, conditional: 'change_password'}),
+    password_confirm: addValidation({required: true, min: 8, max: 255, sameAs: 'password', conditional: 'change_password'}),
 })
 
 const Profile = () => {
+    const profile = useSelector(state => state.persistentState.profile);
+    const dispatch = useDispatch();
+
+    const actions = {
+        updateProfile: (user, callback) => save('/profile', 'PUT', {user}, callback),
+        reloadProfile: dispatch(reloadProfile)
+    }
+
     const formik = useDefaultFormik({
         initialValues: {},
         validationSchema
     });
 
+    useEffect(() => formik.setValues(profile), [])
+
+    const saveProfile = (e) => {
+        e.preventDefault();
+        doSave(formik, actions.updateProfile, () => actions.reloadProfile())
+    }
+
     return (
-        <div>
+        <form id='profile-form'>
             {buildFields([
                 {
                     fieldType: 'avatar',
                     name: 'document',
-                    label: messages.avatar,
                     crop: true
                 },
                 {
@@ -71,16 +93,17 @@ const Profile = () => {
                 },
                 {
                     fieldType: 'password',
-                    name: 'new_password',
+                    name: 'password',
                     label: messages.newPassword
                 },
                 {
                     fieldType: 'password',
-                    name: 'new_password_confirm',
+                    name: 'password_confirm',
                     label: messages.newPasswordConfirm
                 },
             ], formik, validationSchema)}
-        </div>
+            <button onClick={saveProfile}>Save</button>
+        </form>
     );
 };
 

@@ -39,7 +39,7 @@ const messages = buildMessages(defineMessages({
 }));
 
 
-export const unique = (url, id, value) => {
+export const serverSideValidation = (url, id, value) => {
     const config = {
         url: url,
         params: {id, value}
@@ -74,13 +74,17 @@ export const addValidation = (attributes) => {
         })
 
     }
-    if (attributes.unique) {
-        yup = yup.test('unique', {message: messages.alreadyExists}, function (val) {
+    if (attributes.serverSideValidation) {
+        const message = attributes.serverSideValidation.message === 'invalid' ? messages.invalid : attributes.serverSideValidation.message
+        yup = yup.test('serverSideValidation', {message}, function (val) {
                 // don't change to arrow function - there won't be this
                 const id = this.resolve(Yup.ref('id')) ? this.resolve(Yup.ref('id')) : attributes.id;
-                return unique(attributes.unique, id, val);
+                return serverSideValidation(attributes.serverSideValidation.url, id, val);
             }
         );
+    }
+    if (attributes.conditional) {
+        yup = Yup.string().when(attributes.conditional, {is: true, then: yup})
     }
     if (attributes.sameAs) {
         yup = yup.oneOf(

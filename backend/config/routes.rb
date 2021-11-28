@@ -39,6 +39,8 @@ Rails.application.routes.draw do
     post 'forgot_password', to: 'passwords#forgot'
 
     get 'profile', to: 'profile#show'
+    get 'profile/validate_password', to: 'profile#validate_password'
+    put '/profile', to: 'profile#update'
 
     post 'pre_keys_bundle', to: 'prekeys_bundle#save_prekeys_bundle'
     get 'pre_keys_bundle', to: 'prekeys_bundle#send_prekeys_bundle_info'
