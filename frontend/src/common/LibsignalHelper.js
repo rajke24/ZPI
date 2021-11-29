@@ -83,7 +83,10 @@ function sendUserKeysToServer(generatedUserKeys) {
                 signature: arraybuffer_to_string(generatedUserKeys.signedPreKey.signature)
             }
         };
-        post('pre_keys_bundle', prekey_bundle_data, () => {
+        post('pre_keys_bundle', prekey_bundle_data, result => {
+            let deviceId = result.device_id;
+            console.log("Device id: " + deviceId);
+
             console.log("Prekey bundle data sent!");
             resolve();
         });
