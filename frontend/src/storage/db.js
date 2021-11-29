@@ -7,7 +7,7 @@ db.version(6).stores(
 )
 db.version(7).stores(
     {
-        userData: "user_id,registration_id,my_identity_key,prekeys,identity_keys,signed_prekeys,sessions",
+        userData: "user_id,device_id,registration_id,my_identity_key,prekeys,identity_keys,signed_prekeys,sessions",
     }
 )
 

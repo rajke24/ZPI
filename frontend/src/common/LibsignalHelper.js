@@ -14,7 +14,7 @@ LibsignalHelper.ensureIdentityKeys = function(protocol_store, myId) {
                 .then(generatedUserKeys => {
                     return storeUserKeys(protocol_store, generatedUserKeys);
                 }).then((generatedUserKeys) => {
-                return sendUserKeysToServer(generatedUserKeys)
+                return sendUserKeysToServer(protocol_store, generatedUserKeys)
             }).then(() => {
                 console.log("Finished creating identity keys!");
                 protocol_store.save(myId);
@@ -63,7 +63,7 @@ function storeUserKeys(protocolStore, generatedUserKeys) {
     });
 }
 
-function sendUserKeysToServer(generatedUserKeys) {
+function sendUserKeysToServer(protocolStore, generatedUserKeys) {
     return new Promise((resolve, reject) => {
         let prekey_bundle_data = {
             identityKey: arraybuffer_to_string(generatedUserKeys.identityKeyPair.pubKey),
@@ -86,6 +86,7 @@ function sendUserKeysToServer(generatedUserKeys) {
         post('pre_keys_bundle', prekey_bundle_data, result => {
             let deviceId = result.device_id;
             console.log("Device id: " + deviceId);
+            protocolStore.setDeviceId(deviceId);
 
             console.log("Prekey bundle data sent!");
             resolve();

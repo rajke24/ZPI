@@ -8,6 +8,8 @@ function SignalProtocolStore() {
     this.myPreKeys = {};
     this.mySignedPreKeys = {};
     this.sessions = {};
+
+    this.deviceId = undefined;
 }
 
 function arraybuffer_to_string(arraybuffer) {
@@ -22,6 +24,12 @@ SignalProtocolStore.prototype = {
     Direction: {
         SENDING: 1,
         RECEIVING: 2,
+    },
+    setDeviceId: function(deviceId) {
+        this.deviceId = deviceId;
+    },
+    getDeviceId: function() {
+        return this.deviceId;
     },
     setIdentityKeyPair: function(identityKeyPair) {
         this.myIdentityKeyPair = identityKeyPair;
@@ -121,6 +129,7 @@ SignalProtocolStore.prototype = {
     save: async function(user_id) {
         await db.userData.put({
             user_id: user_id,
+            device_id: this.deviceId,
             registration_id: this.myRegistrationId,
             my_identity_key: this.myIdentityKeyPair,
             preKeys: this.myPreKeys,
@@ -197,6 +206,7 @@ SignalProtocolStore.load = function(user_id) {
 
 function createFromMemory(recordFromMemory) {
     let signalProtocolStore = new SignalProtocolStore();
+    signalProtocolStore.deviceId = recordFromMemory.device_id;
     signalProtocolStore.myIdentityKeyPair = recordFromMemory.my_identity_key;
     signalProtocolStore.myRegistrationId = recordFromMemory.registration_id;
     signalProtocolStore.identityKeys = recordFromMemory.identity_keys;
