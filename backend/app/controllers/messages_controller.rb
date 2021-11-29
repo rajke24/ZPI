@@ -1,23 +1,20 @@
 class MessagesController < ApplicationController
   def save_message
-    destination_user = User.find_by(id: message_params[:receiver_id])
-    p current_user
-    p destination_user
+    current_device = Device.find_by(user_id: current_user.id)
+    destination_device = Device.find_by(user_id: message_params[:receiver_id])
 
     new_message = {
-      sender: current_user,
-      receiver: destination_user,
+      sender_id: current_device.user_id,
+      receiver_id: destination_device.user_id,
       content: message_params[:content],
       message_type: message_params[:type],
       sent_at: message_params[:sent_at]
     }
 
-    Message.create!(new_message)
-    message = Message.where(receiver_id: [destination_user.id, current_user.id], sender_id: [destination_user.id, current_user.id]).order(:sent_at).last
-
+    message = Message.create!(new_message)
     ActionCable.server.broadcast('messages', { message: message })
 
-    render json: {status: :ok, message_id: message.id}
+    render json: { status: :ok, message_id: message.id }
 
   end
 
