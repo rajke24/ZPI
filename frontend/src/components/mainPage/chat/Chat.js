@@ -24,7 +24,7 @@ const Chat = () => {
     useEffect(() => {
         ensureProtocolStore({id: profile.id}).then(() => {
             // noinspection JSIgnoredPromiseFromCall
-            LibsignalHelper.ensureIdentityKeys(myProtocolStore);
+            LibsignalHelper.ensureIdentityKeys(myProtocolStore, profile.id);
         });
         MessagesChannel.received = data => {
             console.log("Received message!");
