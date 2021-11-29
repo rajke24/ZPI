@@ -1,17 +1,16 @@
 class PrekeysBundleController < ApplicationController
   def save_prekeys_bundle
-    p current_user
-    device = Device.find_by(user_id: current_user.id)
-    if device == nil
-      device = Device.create(user_id: current_user.id, in_user_hierarchy_index: 1)
-    end
+    user_devices = Device.where(user_id: current_user.id)
+    new_device = Device.create(user_id: current_user.id, in_user_hierarchy_index: user_devices.length + 1) #TODO account for deleting devices
 
     prekeys_bundle_info = {
       identity_key: save_prekeys_bundle_message_params[:identityKey],
       prekeys: save_prekeys_bundle_message_params[:preKeys],
       signed_prekey: save_prekeys_bundle_message_params[:signedPreKey]
     }
-    device.update(prekeys_bundle_info)
+    new_device.update(prekeys_bundle_info)
+    render json: { status: :ok, device_id: new_device.in_user_hierarchy_index }
+
   end
 
   def save_prekeys_bundle_message_params
