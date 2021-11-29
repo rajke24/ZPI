@@ -3,7 +3,7 @@ class PrekeysBundleController < ApplicationController
     p current_user
     device = Device.find_by(user_id: current_user.id)
     if device == nil
-      device = Device.create(user_id: current_user.id)
+      device = Device.create(user_id: current_user.id, in_user_hierarchy_index: 1)
     end
 
     prekeys_bundle_info = {

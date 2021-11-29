@@ -2,11 +2,12 @@
 #
 # Table name: devices
 #
-#  id            :bigint           not null, primary key
-#  identity_key  :string
-#  prekeys       :json
-#  signed_prekey :json
-#  user_id       :bigint           not null
+#  id                      :bigint           not null, primary key
+#  identity_key            :string
+#  in_user_hierarchy_index :bigint           not null
+#  prekeys                 :json
+#  signed_prekey           :json
+#  user_id                 :bigint           not null
 #
 # Indexes
 #
