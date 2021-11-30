@@ -12,7 +12,7 @@ db.version(7).stores(
 )
 
 export const createConversation = async (sender, receiver, messages=[]) => {
-    if(receiver.username === null)
+    if(receiver.username === null || receiver.username === undefined)
         receiver.username = receiver.email;
     await db.conversations.add({
         name: receiver.username,

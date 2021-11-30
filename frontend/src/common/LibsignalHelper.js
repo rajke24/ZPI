@@ -56,8 +56,10 @@ function storeUserKeys(protocolStore, generatedUserKeys) {
         protocolStore.setIdentityKeyPair(generatedUserKeys.identityKeyPair);
         protocolStore.setLocalRegistrationId(generatedUserKeys.registrationId);
         protocolStore.storePreKey(generatedUserKeys.preKeys[0].keyId, generatedUserKeys.preKeys[0]).then(() => {
-            protocolStore.storeSignedPreKey(generatedUserKeys.signedPreKey.keyId, generatedUserKeys.signedPreKey).then(() => {
-                resolve(generatedUserKeys);
+            protocolStore.storePreKey(generatedUserKeys.preKeys[1].keyId, generatedUserKeys.preKeys[1]).then(() => {
+                protocolStore.storeSignedPreKey(generatedUserKeys.signedPreKey.keyId, generatedUserKeys.signedPreKey).then(() => {
+                    resolve(generatedUserKeys);
+                });
             });
         });
     });
@@ -139,7 +141,13 @@ LibsignalHelper.onDataReceived = function(data, profileId, protocolStore) {
             resolve();
             return;
         }
+        if(message.receiver.device_id !== protocolStore.getDeviceId()) {
+            console.log("Message is for my other device so skipping!");
+            resolve();
+            return;
+        }
         console.log("Message is for me so decrypting!");
+
         LibsignalHelper.ensureIdentityKeys(protocolStore, profileId)
             .then(_ => {
                 return decryptMessage(protocolStore, message)
@@ -172,8 +180,8 @@ function decryptMessage(protocolStore, message) {
 }
 
 function getDecryptionMethod(ciphertext, senderId, senderDeviceId, protocolStore) {
-    const receiverAddress = new window.libsignal.SignalProtocolAddress(senderId.toString(), senderDeviceId);
-    const sessionCipher = new window.libsignal.SessionCipher(protocolStore, receiverAddress);
+    const senderAddress = new window.libsignal.SignalProtocolAddress(senderId.toString(), senderDeviceId);
+    const sessionCipher = new window.libsignal.SessionCipher(protocolStore, senderAddress);
 
     if(ciphertext.type === 3) {
         return sessionCipher.decryptPreKeyWhisperMessage;
