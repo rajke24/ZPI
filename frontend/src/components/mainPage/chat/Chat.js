@@ -54,13 +54,11 @@ const Chat = () => {
         sendMessage: () => {
             console.log("Started sending process!");
             const sender = {
-                id: profile.id + '.' + 1,
                 user_id: profile.id,
-                device_id: 1, //TODO
                 email: profile.email
             };
             const receiver = {
-                id: conversation.receiver.id + '.' + 1,
+                id: conversation.receiver.id + '.' + 1, //TODO
                 user_id: conversation.receiver.id,
                 device_id: 1 //TODO
             };

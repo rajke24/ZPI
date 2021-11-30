@@ -112,7 +112,7 @@ function ensureSession(protocolStore, receiver) {
 
 function createSession(protocol_store, receiver) {
     return new Promise((resolve, reject) => {
-        get("/pre_keys_bundle/", {id: receiver.user_id}, (result) => {
+        get("/pre_keys_bundle/", {user_id: receiver.user_id, device_id: receiver.device_id}, (result) => {
             let receivedPreKeyBundle = {
                 registrationId: 1, //TODO
                 identityKey: string_to_arraybuffer(result.identity_key),
@@ -160,8 +160,8 @@ function ensureConversation(profileId, otherUserId, receiver_email) {
 //make sure to call ensureProtocolStore() before calling this function!
 LibsignalHelper.onDataReceived = function(data, profileId, protocolStore) {
     return new Promise((resolve, reject) => {
-        const message = {...data.message, message_type: data.message.sender_id === profileId ? 'sent' : 'received'}
-        if(message.receiver_id !== profileId) {
+        const message = {...data.message, message_type: data.message.sender.user_id === profileId ? 'sent' : 'received'}
+        if(message.receiver.user_id !== profileId) {
             console.log("Message isn't for me so skipping!");
             resolve();
             return;
@@ -172,7 +172,7 @@ LibsignalHelper.onDataReceived = function(data, profileId, protocolStore) {
                 return decryptMessage(protocolStore, message)
             })
             .then(decryptedMessage => {
-                ensureConversation(profileId, message.sender_id, decryptedMessage.email).then(_ => {
+                ensureConversation(profileId, message.sender.user_id, decryptedMessage.email).then(_ => {
                     saveReceivedMessage(profileId, decryptedMessage, message, protocolStore)
                     console.log("Finished decrypting message!");
                     resolve();
@@ -184,7 +184,7 @@ LibsignalHelper.onDataReceived = function(data, profileId, protocolStore) {
 function decryptMessage(protocolStore, message) {
     return new Promise((resolve, reject) => {
         const ciphertext = JSON.parse(message.content);
-        let decryptionMethod = getDecryptionMethod(ciphertext, message.sender_id, protocolStore);
+        let decryptionMethod = getDecryptionMethod(ciphertext, message.sender.user_id, protocolStore);
         decryptionMethod(ciphertext.body, 'binary').then(newPlaintext => {
             let decryptedMessage = new TextDecoder('utf-8').decode(newPlaintext);
             let emailEndPosition = decryptedMessage.search("/");
@@ -213,7 +213,7 @@ function getDecryptionMethod(ciphertext, senderId, protocolStore) {
 
 function saveReceivedMessage (myId, decryptedMessage, message, protocolStore) {
     message.content = decryptedMessage.message;
-    db.conversations.where({sender_id: myId, 'receiver.id': message.sender_id}).modify(c => c.messages.push(message));
+    db.conversations.where({sender_id: myId, 'receiver.id': message.sender.user_id}).modify(c => c.messages.push(message));
     protocolStore.save(myId);
 }
 
@@ -229,7 +229,7 @@ LibsignalHelper.sendMessage = function(plaintextMessage, protocolStore, sender, 
         }).then(_ => {
             return encryptMessage(protocolStore, sender, receiver, plaintextMessage);
         }).then(ciphertext => {
-            return sendMessageToServer(ciphertext, receiver)
+            return sendMessageToServer(ciphertext, receiver, protocolStore)
         }).then(messageParams => {
             return saveSendMessage(messageParams, receiver, sender, plaintextMessage)
         }).then(_ => {
@@ -252,15 +252,20 @@ function encryptMessage(protocolStore, sender, receiver, message) {
     });
 }
 
-function sendMessageToServer(ciphertext, receiver){
+function sendMessageToServer(ciphertext, receiver, protocolStore){
     return new Promise((resolve, reject) => {
         let currentDate = new Date();
+
         save('messages/save_message', 'POST', {
-            content: JSON.stringify(ciphertext),
-            receiver_id: receiver.user_id,
-            sent_at: currentDate,
-            type: 'type'
-        }, (params) => {
+            messages: [{
+                content: JSON.stringify(ciphertext),
+                sender_device_id: protocolStore.getDeviceId(),
+                receiver_id: receiver.user_id,
+                receiver_device_id: 1, //TODO
+                sent_at: currentDate,
+                type: 'type'
+            }
+        ]}, (params) => {
             console.log("Message sent!");
             resolve({
                 message_id: params.message_id,
