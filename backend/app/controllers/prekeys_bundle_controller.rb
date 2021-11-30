@@ -18,7 +18,7 @@ class PrekeysBundleController < ApplicationController
   end
 
   def send_prekeys_bundle_info
-    destination_device = Device.find_by(user_id: get_prekey_bundle_message_params[:id])
+    destination_device = Device.find_by(user_id: get_prekey_bundle_message_params[:user_id], in_user_hierarchy_index: get_prekey_bundle_message_params[:device_id])
 
     to_pass = {
       identity_key: destination_device.identity_key,
@@ -35,6 +35,6 @@ class PrekeysBundleController < ApplicationController
 
   private
   PREKEY_BUNDLE_PUT_PARAMS = [:identityKey, { preKeys: [:keyId, :publicKey]}, { signedPreKey: [:keyId, :publicKey, :signature]}]
-  PREKEY_BUNDLE_GET_PARAMS = [:id]
+  PREKEY_BUNDLE_GET_PARAMS = [:user_id, :device_id]
 
 end
