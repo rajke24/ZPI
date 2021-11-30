@@ -43,6 +43,7 @@ class MessagesController < ApplicationController
 
 
   def save_message
+
     sender_device = Device.where(user_id: current_user.id, in_user_hierarchy_index: message_params[:sender_device_id]).last
     receiver_devices = Device.where(user_id: message_params[:receiver_user_id])
 
@@ -61,12 +62,12 @@ class MessagesController < ApplicationController
         ActionCable.server.broadcast('messages', {
                                        message: {
                                          id: created_message.id,
-                                         content: created_message.content,
-                                         message_type: created_message.message_type,
-                                         sent_at: created_message.sent_at,
+                                         content: message[:content],
+                                         message_type: message[:message_type],
+                                         sent_at: message[:sent_at],
                                          sender: {
                                            user_id: sender_device.user_id,
-                                           device_id: sender_device.id
+                                           device_id: sender_device.in_user_hierarchy_index
                                          },
                                          receiver: {
                                            user_id: message_params[:receiver_user_id],
