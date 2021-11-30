@@ -110,33 +110,6 @@ function ensureSession(protocolStore, receiver) {
     });
 }
 
-function createSession(protocol_store, receiver) {
-    return new Promise((resolve, reject) => {
-        get("/pre_keys_bundle/", {user_id: receiver.user_id, device_id: receiver.device_id}, (result) => {
-            let receivedPreKeyBundle = {
-                registrationId: 1, //TODO
-                identityKey: string_to_arraybuffer(result.identity_key),
-                preKey: {
-                    keyId: result.prekey.keyId,
-                    publicKey: string_to_arraybuffer(result.prekey.publicKey)
-                },
-                signedPreKey: {
-                    keyId: result.signed_key.keyId,
-                    publicKey: string_to_arraybuffer(result.signed_key.publicKey),
-                    signature: string_to_arraybuffer(result.signed_key.signature)
-                }
-            };
-
-            let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id, receiver.device_id);
-            let sessionBuilder = new window.libsignal.SessionBuilder(protocol_store, receiverAddress);
-            sessionBuilder.processPreKey(receivedPreKeyBundle).then(() => {
-                console.log("New session created!");
-                resolve();
-            });
-        });
-    });
-}
-
 function ensureConversation(profileId, otherUserId, receiver_email) {
     return new Promise((resolve, reject) => {
         db.conversations.get({sender_id: profileId, 'receiver.id': otherUserId}).then(result => {
@@ -184,7 +157,7 @@ LibsignalHelper.onDataReceived = function(data, profileId, protocolStore) {
 function decryptMessage(protocolStore, message) {
     return new Promise((resolve, reject) => {
         const ciphertext = JSON.parse(message.content);
-        let decryptionMethod = getDecryptionMethod(ciphertext, message.sender.user_id, protocolStore);
+        let decryptionMethod = getDecryptionMethod(ciphertext, message.sender.user_id, message.sender.device_id, protocolStore);
         decryptionMethod(ciphertext.body, 'binary').then(newPlaintext => {
             let decryptedMessage = new TextDecoder('utf-8').decode(newPlaintext);
             let emailEndPosition = decryptedMessage.search("/");
@@ -198,8 +171,8 @@ function decryptMessage(protocolStore, message) {
     });
 }
 
-function getDecryptionMethod(ciphertext, senderId, protocolStore) {
-    const receiverAddress = new window.libsignal.SignalProtocolAddress(senderId.toString(), 1);
+function getDecryptionMethod(ciphertext, senderId, senderDeviceId, protocolStore) {
+    const receiverAddress = new window.libsignal.SignalProtocolAddress(senderId.toString(), senderDeviceId);
     const sessionCipher = new window.libsignal.SessionCipher(protocolStore, receiverAddress);
 
     if(ciphertext.type === 3) {
@@ -221,17 +194,27 @@ function saveReceivedMessage (myId, decryptedMessage, message, protocolStore) {
 
 //region Encrypting messages
 
+
+function getKnownDevices(profileId, otherUserId) {
+    return new Promise((resolve, reject) => {
+        db.conversations.get({sender_id: profileId, 'receiver.id': otherUserId}).then(result => {
+            resolve(result.known_receiver_devices);
+        });
+    });
+}
+
+
 //make sure to call ensureProtocolStore() before calling this function!
 LibsignalHelper.sendMessage = function(plaintextMessage, protocolStore, sender, receiver) {
     return new Promise((resolve, reject) => {
         LibsignalHelper.ensureIdentityKeys(protocolStore, sender.user_id).then(_ => {
-            return ensureSession(protocolStore, receiver);
-        }).then(_ => {
-            return encryptMessage(protocolStore, sender, receiver, plaintextMessage);
-        }).then(ciphertext => {
-            return sendMessageToServer(ciphertext, receiver, protocolStore)
+            return getKnownDevices(sender.user_id, receiver.user_id);
+        }).then(knownReceiverDevices => {
+            return encryptAllMessages(protocolStore, sender, receiver, plaintextMessage, knownReceiverDevices)
+        }).then(ciphertexts => {
+            return sendAllMessagesToServer(ciphertexts, receiver, protocolStore, sender, plaintextMessage);
         }).then(messageParams => {
-            return saveSendMessage(messageParams, receiver, sender, plaintextMessage)
+            return saveSendMessage(messageParams, receiver, sender, plaintextMessage);
         }).then(_ => {
             protocolStore.save(sender.user_id);
             console.log("Finished sending process!");
@@ -240,40 +223,160 @@ LibsignalHelper.sendMessage = function(plaintextMessage, protocolStore, sender, 
     });
 }
 
-function encryptMessage(protocolStore, sender, receiver, message) {
-    let messageWithEmail = `${sender.email}/${message}`;
-
+function encryptAllMessages(protocolStore, sender, receiver, message, knownReceiverDevices) {
     return new Promise((resolve, reject) => {
-        let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id, receiver.device_id);
+       let messageWithEmail = `${sender.email}/${message}`;
+       Promise.all(knownReceiverDevices.map(device_id => encryptMessage(protocolStore, sender, receiver, messageWithEmail, device_id))).then(ciphertexts => {
+          resolve(ciphertexts);
+       });
+    });
+}
+
+function encryptAllMessagesRepeat(protocolStore, sender, receiver, message, knownReceiverDevices, previousCiphertexts) {
+    return new Promise((resolve, reject) => {
+        let updatedCiphertexts = previousCiphertexts.filter(function(value) {
+           return knownReceiverDevices.includes(value.device_id); //we are removing devices that are outdated
+        });
+
+        let alreadyEncryptedDevices = previousCiphertexts.map(value => value.device_id);
+        let nonEncryptedDevices = knownReceiverDevices.filter(function(value) {
+            return !alreadyEncryptedDevices.includes(value);
+        });
+
+        let messageWithEmail = `${sender.email}/${message}`;
+        Promise.all(nonEncryptedDevices.map(device_id => encryptMessage(protocolStore, sender, receiver, messageWithEmail, device_id))).then(ciphertexts => {
+            resolve(updatedCiphertexts.concat(ciphertexts));
+        });
+    });
+}
+
+function encryptMessage(protocolStore, sender, receiver, message, receiver_device_id) {
+    return new Promise((resolve, reject) => {
+        let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id, receiver_device_id);
         let sessionCipher = new window.libsignal.SessionCipher(protocolStore, receiverAddress);
-        sessionCipher.encrypt(messageWithEmail).then(ciphertext => {
-            resolve(ciphertext);
+        sessionCipher.encrypt(message).then(ciphertext => {
+            resolve({ device_id: receiver_device_id[0], ciphertext: ciphertext });
         });
     });
 }
 
-function sendMessageToServer(ciphertext, receiver, protocolStore){
+function sendAllMessagesToServer(ciphertexts, receiver, protocolStore, sender, message) {
     return new Promise((resolve, reject) => {
+        let messages = [];
         let currentDate = new Date();
-
+        for(let i = 0; i < ciphertexts.length; i++) {
+           const ciphertext = ciphertexts[i];
+           messages.push( {
+              content: JSON.stringify(ciphertext.ciphertext),
+              receiver_device_id:  ciphertext.device_id,
+              sent_at: currentDate,
+              type: 'type'
+           });
+        }
         save('messages/save_message', 'POST', {
-            messages: [{
-                content: JSON.stringify(ciphertext),
-                sender_device_id: protocolStore.getDeviceId(),
-                receiver_id: receiver.user_id,
-                receiver_device_id: 1, //TODO
-                sent_at: currentDate,
-                type: 'type'
+            receiver_user_id: receiver.user_id,
+            sender_device_id: protocolStore.getDeviceId(),
+            messages: messages
+        }, (params) => {
+            if(params.message_id === undefined) {
+                console.log(params);
+                updateDevices(sender.user_id, receiver.user_id, protocolStore, params.invalid_devices).then(_ => {
+                    return getKnownDevices(sender.user_id, receiver.user_id)
+                }).then(knownDevices => {
+                    return encryptAllMessagesRepeat(protocolStore, sender, receiver, message, knownDevices, ciphertexts);
+                }).then(ciphertexts => {
+                    return sendAllMessagesToServer(ciphertexts, receiver, protocolStore, sender, message);
+                }).then(new_params => {
+                    resolve(new_params);
+                });
+            } else {
+                console.log("Message sent!");
+                resolve( {
+                    message_id: params.message_id,
+                    send_at: currentDate
+                });
             }
-        ]}, (params) => {
-            console.log("Message sent!");
-            resolve({
-                message_id: params.message_id,
-                send_at: currentDate
-            });
         });
     });
 }
+
+
+function createSession(otherUserId, protocolStore, deviceToAdd) {
+    return new Promise((resolve, reject) => {
+        let preKeyBundle = {
+            registrationId: 1, //TODO
+            identityKey: string_to_arraybuffer(deviceToAdd.prekey_bundle.identity_key),
+            preKey: {
+                keyId: deviceToAdd.prekey_bundle.prekey.keyId,
+                publicKey: string_to_arraybuffer(deviceToAdd.prekey_bundle.prekey.publicKey)
+            },
+            signedPreKey: {
+                keyId: deviceToAdd.prekey_bundle.signed_key.keyId,
+                publicKey: string_to_arraybuffer(deviceToAdd.prekey_bundle.signed_key.publicKey),
+                signature: string_to_arraybuffer(deviceToAdd.prekey_bundle.signed_key.signature)
+            }
+        };
+        let receiverAddress = new window.libsignal.SignalProtocolAddress(otherUserId, deviceToAdd.device_id);
+        let sessionBuilder = new window.libsignal.SessionBuilder(protocolStore, receiverAddress);
+        sessionBuilder.processPreKey(preKeyBundle).then(() => {
+            console.log("New session created!");
+            resolve();
+        });
+    });
+}
+
+
+function updateDevices(profileId, otherUserId, protocolStore, invalid_devices) {
+    return new Promise((resolve, reject) => {
+        let devicesToRemove = invalid_devices.filter(function(value) {
+            return value.prekey_bundle === undefined;
+        });
+        devicesToRemove = devicesToRemove.map(function(value) {
+            return value.device_id;
+        });
+
+        let devicesToAdd = invalid_devices.filter(function(value) {
+            return value.prekey_bundle !== undefined;
+        });
+
+        new Promise((resolve, reject) => {
+            if(devicesToRemove.length !== 0) {
+                db.conversations.get({sender_id: profileId, 'receiver.id': otherUserId}).then(result => {
+                    let knownDevices = result.known_receiver_devices;
+                    let updatedDevices = knownDevices.filter(function(value) {
+                        return !devicesToRemove.includes(value);
+                    });
+
+                    db.conversations.update(result.id, {known_receiver_devices: updatedDevices});
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        }).then(_ => {
+            return new Promise((resolve, reject) => {
+                if(devicesToAdd.length !== 0) {
+                    Promise.all(devicesToAdd.map(deviceToAdd => createSession(otherUserId, protocolStore, deviceToAdd))).then(_ => {
+                        db.conversations.get({sender_id: profileId, 'receiver.id': otherUserId}).then(result => {
+                            let knownDevices = result.known_receiver_devices;
+                            let devicesToAddIndexes = devicesToAdd.map(value => value.device_id);
+
+                            let updatedDevices = knownDevices.concat(devicesToAddIndexes);
+                            db.conversations.update(result.id, {known_receiver_devices: updatedDevices});
+                            resolve();
+                        });
+                    });
+                } else {
+                    resolve();
+                }
+            });
+        }).then(_ => {
+            protocolStore.save(profileId);
+            resolve();
+        });
+    });
+}
+
 
 function saveSendMessage(message_params, receiver, sender, plaintextMessage) {
     return new Promise((resolve, reject) => {

@@ -3,7 +3,7 @@ import Dexie from 'dexie'
 const db = new Dexie('byespy_database');
 
 db.version(6).stores(
-    { conversations: "++id,receiver,sender_id,name,messages"},
+    { conversations: "++id,receiver,sender_id,name,messages,known_receiver_devices"},
 )
 db.version(7).stores(
     {
@@ -18,7 +18,8 @@ export const createConversation = async (sender, receiver, messages=[]) => {
         name: receiver.username,
         sender_id: sender.id,
         receiver,
-        messages
+        messages,
+        known_receiver_devices: []
     })
 }
 
