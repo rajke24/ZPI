@@ -1,43 +1,85 @@
 class MessagesController < ApplicationController
+
+  def get_invalid_devices(receiver_devices, messages)
+    invalid_devices = []
+
+    actual_receiver_devices_ids = receiver_devices.collect { |d| [d.in_user_hierarchy_index] }
+    sent_receiver_devices_ids = messages.collect { |m| [m[:receiver_device_id]] }
+
+    actual_receiver_devices_ids.each do |device|
+      if (sent_receiver_devices_ids.include? device) == false
+        invalid_devices.push({ device_index: device, reason: :missing })
+      end
+    end
+
+    sent_receiver_devices_ids.each do |device|
+      if (actual_receiver_devices_ids.include? device) == false
+        invalid_devices.push({ device_index: device, reason: :outdated })
+      end
+    end
+    return invalid_devices
+  end
+
+  def get_invalid_devices_response(receiver_devices, invalid_devices)
+    response = []
+    invalid_devices.each do |invalid_device|
+      if invalid_device[:reason] == :missing
+        device_info = receiver_devices.where(in_user_hierarchy_index: invalid_device[:device_index]).last
+        response.push({
+                        device_id: invalid_device[:device_index],
+                        prekey_bundle: {
+                          identity_key: device_info.identity_key,
+                          signed_key: device_info.signed_prekey,
+                          prekey: device_info.prekeys[0]
+                        }
+                      })
+      else
+        response.push({ device_id: invalid_device[:device_index] })
+      end
+    end
+    response
+  end
+
+
+
   def save_message
-    current_message_params = message_params[:messages][0]
+    sender_device = Device.where(user_id: current_user.id, in_user_hierarchy_index: message_params[:sender_device_id]).last
+    receiver_devices = Device.where(user_id: message_params[:receiver_user_id])
 
-    sender_user_id = current_user.id
-    receiver_user_id = current_message_params[:receiver_id]
+    invalid_devices = get_invalid_devices(receiver_devices, message_params[:messages])
 
-    sender_device_id = current_message_params[:sender_device_id]
-    receiver_device_id = current_message_params[:receiver_device_id]
-
-    current_device = Device.where(user_id: sender_user_id, in_user_hierarchy_index: sender_device_id).last
-    destination_device = Device.where(user_id: receiver_user_id, in_user_hierarchy_index: receiver_device_id).last
-
-    new_message = {
-      sender_id: current_device.id,
-      receiver_id: destination_device.id,
-      content: current_message_params[:content],
-      message_type: current_message_params[:type],
-      sent_at: current_message_params[:sent_at]
-    }
-
-    message = Message.create!(new_message)
-    ActionCable.server.broadcast('messages', {
-                                   message: {
-                                     id: message.id,
-                                     content: message.content,
-                                     message_type: message.message_type,
-                                     sent_at: message.sent_at,
-                                     sender: {
-                                       user_id: sender_user_id,
-                                       device_id: sender_device_id
-                                     },
-                                     receiver: {
-                                       user_id: receiver_user_id,
-                                       device_id: receiver_device_id
-                                     }
-                                   }
-                                 })
-
-    render json: { status: :ok, message_id: message.id }
+    if invalid_devices.empty?
+      new_message = {
+        sender_id: sender_device.id,
+        receiver_id: receiver_devices[0].id,
+        content: message_params[:messages][0][:content],
+        message_type: message_params[:messages][0][:type],
+        sent_at: message_params[:messages][0][:sent_at]
+      }
+      created_message = Message.create!(new_message)
+      message_params[:messages].each do |message|
+        ActionCable.server.broadcast('messages', {
+                                       message: {
+                                         id: created_message.id,
+                                         content: created_message.content,
+                                         message_type: created_message.message_type,
+                                         sent_at: created_message.sent_at,
+                                         sender: {
+                                           user_id: sender_device.user_id,
+                                           device_id: sender_device.id
+                                         },
+                                         receiver: {
+                                           user_id: message_params[:receiver_user_id],
+                                           device_id: message[:receiver_device_id]
+                                         }
+                                       }
+                                     })
+      end
+      render json: { status: :ok, message_id: created_message.id }
+    else
+      invalid_devices_response = get_invalid_devices_response(receiver_devices, invalid_devices)
+      render json: { status: :ok, invalid_devices: invalid_devices_response }
+    end
 
   end
 
@@ -48,7 +90,7 @@ class MessagesController < ApplicationController
     waiting_messages.delete_all
   end
 
-  PASSED_MESSAGE_PARAMS = [{messages: [:content, :sender_device_id, :receiver_id, :receiver_device_id, :sent_at, :type]}]
+  PASSED_MESSAGE_PARAMS = [:receiver_user_id, :sender_device_id, {messages: [:content, :receiver_device_id, :sent_at, :type]}]
 
   def message_params
     params.permit(PASSED_MESSAGE_PARAMS)
