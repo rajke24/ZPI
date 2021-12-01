@@ -33,7 +33,7 @@ class InvitationsController < ApplicationController
   def check
     invitee = User.find_by(email: params[:value])
     if invitee
-      unique = !Invitation.where(inviter_id: current_user.id, invitee_id: invitee.id).exists?
+      unique = !Invitation.where(inviter_id: [current_user.id, invitee.id], invitee_id: [current_user.id, invitee.id]).exists?
       render json: unique
     end
   end

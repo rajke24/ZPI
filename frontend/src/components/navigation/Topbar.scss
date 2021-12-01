@@ -27,7 +27,7 @@
     justify-content: center;
 
     .invite-btn {
-      margin: 0 100px 0 20px;
+      margin: 0 20px 0 20px;
       padding: 15px 10px;
       background: $semi-light-green;
       font-weight: 600;
@@ -45,6 +45,8 @@
       font-weight: 500;
       color: #555555;
       margin-right: 20px;
+      width: 150px;
+      text-align: right;
     }
 
     .avatar {

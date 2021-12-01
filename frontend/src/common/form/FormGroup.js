@@ -27,7 +27,7 @@ export const defaultOnChange = (formik) => async (name, value) => {
 
 const formGroup = (WrappedComponent) => {
     return (props) => {
-        const {label, formik, validationSchema, name, hidden, width, placeholder} = props;
+        const {label, formik, validationSchema, name, hidden, width, placeholder, includeFieldNameInError} = props;
         const {formatMessage} = useIntl();
         const fieldName = label ? formatMessage(label) : placeholder ? placeholder : null
 
@@ -55,7 +55,7 @@ const formGroup = (WrappedComponent) => {
                 </div>}
                 <div>
                     {error && <FormFeedback error={true} full={false}>
-                        {`${fieldName} ${formatMessage(error.message, error.params)}`}
+                        {`${includeFieldNameInError ? fieldName : ''} ${formatMessage(error.message, error.params)}`}
                     </FormFeedback>}
                     <WrappedComponent {...newProps}/>
                 </div>

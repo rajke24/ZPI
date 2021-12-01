@@ -15,7 +15,7 @@ import {defineMessages} from "react-intl";
 const messages = buildMessages(defineMessages({
     invitationAlreadySent: {
         id: 'Profile.InvitationAlreadySent.Label',
-        defaultMessage: 'Invitation already sent'
+        defaultMessage: 'Invitation already sent or received'
     }
 }));
 
