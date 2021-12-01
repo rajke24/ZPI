@@ -79,6 +79,28 @@
         width: 100%;
         font-weight: 700;
         padding: 10px;
+
+        &.primary-btn {
+          color: $white;
+          font-size: 16px;
+          background: -webkit-linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+          background: -o-linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+          background: -ms-linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+          background: linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
+          opacity: 0.9;
+          margin-top: 20px;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+
+        &.secondary-btn {
+          margin-top: 15px;
+          background: linear-gradient(90deg, #C1FFE8 19.05%, #E2FFF1 88.72%);
+          border: 2px solid $semi-light-green;
+          color: $green;
+        }
       }
     }
   }

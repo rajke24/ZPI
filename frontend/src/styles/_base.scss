@@ -37,19 +37,13 @@ button {
   border-radius: 6px;
   border: none;
   cursor: pointer;
+  transition: .3s ease;
+  background: $semi-light-green;
+  color: white;
+  font-weight: 600;
 
-  &.primary-btn {
-    color: $white;
-    font-size: 16px;
-    background: linear-gradient(90deg, #2CCC76 27.64%, #02EE97 77.64%);
-    margin-top: 20px;
-  }
-
-  &.secondary-btn {
-    margin-top: 15px;
-    background: linear-gradient(90deg, #C1FFE8 19.05%, #E2FFF1 88.72%);
-    border: 2px solid $semi-light-green;
-    color: $green;
+  &:hover {
+    background: #15c986;
   }
 }
 
@@ -189,15 +183,4 @@ label {
   font-weight: 600;
   color: gray;
   margin-left: 10px;
-}
-
-button {
-  background: $semi-light-green;
-  color: white;
-  transition: 0.5s ease;
-  font-weight: 600;
-
-  &:hover {
-    background: #15c986;
-  }
 }
