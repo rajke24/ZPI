@@ -59,11 +59,15 @@
       border-radius: 14px;
       padding-left: 10px;
       background: transparent;
+      overflow: hidden;
+      perspective: 1px;
 
       input {
-        width: 90%;
+        width: calc(100% - 90px);
         border: none;
+        padding: 5px 0 5px 0;
         font-size: 14px;
+        margin: 0;
 
         &::placeholder {
           font-size: 14px;
