@@ -8,7 +8,7 @@ import {useHistory} from "react-router";
 import {post} from "../../shared/ApiClientBuilder";
 import './AuthPages.scss';
 import logo from "../../common/images/logo.svg";
-import Icon, {lockIcon, mailIcon} from "../../common/icon/Icon";
+import Icon, {lockIcon, mailIcon, personIcon} from "../../common/icon/Icon";
 import {Link} from "react-router-dom";
 import {doSave} from "../../common/form/FormHelpers";
 
@@ -20,6 +20,10 @@ const messages = buildMessages(defineMessages({
     password: {
         id: 'RegistrationPage.Password.Placeholder',
         defaultMessage: 'Password'
+    },
+    username: {
+        id: 'RegistrationPage.Username.Placeholder',
+        defaultMessage: 'Username'
     },
     confirmPassword: {
         id: 'RegistrationPage.ConfirmPassword.Placeholder',
@@ -62,9 +66,9 @@ const RegistrationPage = () => {
         e.preventDefault()
 
         doSave(formik, (values) => {
-            const {email, password} = values;
+            const {email, password, username} = values;
             const params = {
-                user: {email, password}
+                user: {email, password, username}
             }
             actions.signUp(params, () => {
                 setRegisteredSuccessfully(true)
@@ -90,6 +94,12 @@ const RegistrationPage = () => {
                             name: 'email',
                             placeholder: formatMessage(messages.email),
                             icon: <Icon icon={mailIcon}/>
+                        },
+                        {
+                            fieldType: 'input',
+                            name: 'username',
+                            placeholder: formatMessage(messages.username),
+                            icon: <Icon icon={personIcon}/>
                         },
                         {
                             fieldType: 'password',

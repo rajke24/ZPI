@@ -10,10 +10,10 @@
 
   .auth-panel {
     width: 500px;
-    height: 500px;
+    min-height: 500px;
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 10px 0 30px 0;
     flex-direction: column;
     background: $white;
     border-radius: 30px;

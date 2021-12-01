@@ -16,7 +16,7 @@ class SignUpController < ApplicationController
 
   private
 
-  ALLOWED_PARAMS = [:email, :password]
+  ALLOWED_PARAMS = [:email, :password, :username]
 
   def user_params
     params.require('user').permit(ALLOWED_PARAMS)

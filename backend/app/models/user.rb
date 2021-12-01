@@ -107,7 +107,7 @@ class User < ApplicationRecord
   def send_new_user_email
     if password
       Mailer.send_user_email(email, {
-        recipient_name: email,
+        recipient_username: username,
         link: "#{Rails.configuration.frontend_url}/login/#{self.activation_token}"
       }).deliver_later
     end

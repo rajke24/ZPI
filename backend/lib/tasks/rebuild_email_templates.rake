@@ -7,7 +7,7 @@ namespace :email_templates do
         subject: 'Welcome on ByeSpy',
         filename: 'new_user',
         illustration: 'new_user.png',
-        variables: [:recipient_name, :link]
+        variables: [:recipient_username, :link]
       },
       {
         subject: 'Password reset requested',

@@ -9,6 +9,7 @@ import {ReactComponent as Invitations} from "./icons/invitations.svg";
 import {ReactComponent as Logout} from "./icons/logout.svg";
 import {ReactComponent as Settings} from "./icons/settings.svg";
 import {ReactComponent as Delete} from "./icons/delete.svg";
+import {ReactComponent as Person} from "./icons/person.svg";
 
 export const lockIcon = Lock;
 export const mailIcon = Mail;
@@ -19,6 +20,7 @@ export const invitationsIcon = Invitations;
 export const logoutIcon = Logout;
 export const settingsIcon = Settings;
 export const deleteIcon = Delete;
+export const personIcon = Person;
 
 const Icon = ({id, onClick, icon}) => {
     return <div className="icon" id={id} onClick={onClick}>{React.createElement(icon)}</div>
