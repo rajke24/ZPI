@@ -1,0 +1,12 @@
+[
+  "receiver_user_id",
+  "sender_device_id",
+  {
+    "messages": [
+      "content",
+      "receiver_device_id",
+      "sent_at",
+      "type"
+    ]
+  }
+]

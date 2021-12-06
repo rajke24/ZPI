@@ -40,10 +40,7 @@ class MessagesController < ApplicationController
     response
   end
 
-
-
   def save_message
-
     sender_device = Device.where(user_id: current_user.id, in_user_hierarchy_index: message_params[:sender_device_id]).last
     receiver_devices = Device.where(user_id: message_params[:receiver_user_id])
 
@@ -81,7 +78,6 @@ class MessagesController < ApplicationController
       invalid_devices_response = get_invalid_devices_response(receiver_devices, invalid_devices)
       render json: { status: :ok, invalid_devices: invalid_devices_response }
     end
-
   end
 
   def find_waiting_messages
@@ -91,9 +87,11 @@ class MessagesController < ApplicationController
     waiting_messages.delete_all
   end
 
-  PASSED_MESSAGE_PARAMS = [:receiver_user_id, :sender_device_id, {messages: [:content, :receiver_device_id, :sent_at, :type]}]
+  private
+
+  ALLOWED_PARAMS = [:receiver_user_id, :sender_device_id, {messages: [:content, :receiver_device_id, :sent_at, :type]}]
 
   def message_params
-    params.permit(PASSED_MESSAGE_PARAMS)
+    params.permit(ALLOWED_PARAMS)
   end
 end

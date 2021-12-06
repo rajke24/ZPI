@@ -7,19 +7,19 @@ class InvitationsController < ApplicationController
     }
   end
 
+  def show
+  end
+
   def create
     invitee = User.find_by(email: invitation_params[:invitee_email])
 
-    invitation = Invitation.new({
+    @invitation = Invitation.new({
                                   status: 'pending',
                                   invitee: invitee,
                                   inviter: current_user
                                 })
-    if invitation.save
-      render json: 'success'
-    else
-      render json: 'error'
-    end
+    @invitation.save!
+    head :created
   end
 
   def update

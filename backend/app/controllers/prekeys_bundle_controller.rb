@@ -4,21 +4,16 @@ class PrekeysBundleController < ApplicationController
     new_device = Device.create(user_id: current_user.id, in_user_hierarchy_index: user_devices.length + 1) #TODO account for deleting devices
 
     prekeys_bundle_info = {
-      identity_key: save_prekeys_bundle_message_params[:identityKey],
-      prekeys: save_prekeys_bundle_message_params[:preKeys],
-      signed_prekey: save_prekeys_bundle_message_params[:signedPreKey]
+      identity_key: prekey_bundle_params[:identityKey],
+      prekeys: prekey_bundle_params[:preKeys],
+      signed_prekey: prekey_bundle_params[:signedPreKey]
     }
     new_device.update(prekeys_bundle_info)
     render json: { status: :ok, device_id: new_device.in_user_hierarchy_index }
-
-  end
-
-  def save_prekeys_bundle_message_params
-    params.permit(PREKEY_BUNDLE_PUT_PARAMS)
   end
 
   def send_prekeys_bundle_info
-    destination_device = Device.find_by(user_id: get_prekey_bundle_message_params[:user_id], in_user_hierarchy_index: get_prekey_bundle_message_params[:device_id])
+    destination_device = Device.find_by(user_id: prekey_bundle_params[:user_id], in_user_hierarchy_index: prekey_bundle_params[:device_id])
 
     to_pass = {
       identity_key: destination_device.identity_key,
@@ -29,12 +24,11 @@ class PrekeysBundleController < ApplicationController
     # TODO remove taken prekey
   end
 
-  def get_prekey_bundle_message_params
-    params.permit(PREKEY_BUNDLE_GET_PARAMS)
-  end
-
   private
-  PREKEY_BUNDLE_PUT_PARAMS = [:identityKey, { preKeys: [:keyId, :publicKey]}, { signedPreKey: [:keyId, :publicKey, :signature]}]
-  PREKEY_BUNDLE_GET_PARAMS = [:user_id, :device_id]
 
+  ALLOWED_PARAMS = [:user_id, :device_id, :identityKey, { preKeys: [:keyId, :publicKey]}, { signedPreKey: [:keyId, :publicKey, :signature]}]
+
+  def prekey_bundle_params
+    params.permit(ALLOWED_PARAMS)
+  end
 end

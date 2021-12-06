@@ -59,7 +59,7 @@ class User < ApplicationRecord
     def authenticate_first_step(email, password)
       user = User.find_by_email(email)
 
-      if user&.authenticate(password)
+      if user&.authenticate(password) && user&.activated
         user
       else
         nil

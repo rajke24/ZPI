@@ -1,0 +1,18 @@
+[
+  "user_id",
+  "device_id",
+  "identityKey",
+  {
+    "preKeys": [
+      "keyId",
+      "publicKey"
+    ]
+  },
+  {
+    "signedPreKey": [
+      "keyId",
+      "publicKey",
+      "signature"
+    ]
+  }
+]

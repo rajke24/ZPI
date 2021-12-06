@@ -21,12 +21,14 @@ const AppTemplateAuthorized = ({children}) => {
     if (profile && !matchesAnyAuthorizedRoute(location.pathname)) history.push(defaultRoute());
 
     useEffect(() => {
-        actions.fetchAcceptedInvitations(invitations => {
-            invitations.map(invitation => {
-                createConversation(profile, invitation.invitee);
-                actions.deleteInvitation(invitation);
+        if (profile) {
+            actions.fetchAcceptedInvitations(invitations => {
+                invitations.map(invitation => {
+                    createConversation(profile, invitation.invitee);
+                    actions.deleteInvitation(invitation);
+                })
             })
-        })
+        }
     }, [location])
 
     return <>

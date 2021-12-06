@@ -1,0 +1,26 @@
+{
+  "sent": [
+    {
+      "id": "ANY",
+      "created_at": "ANY",
+      "status": "pending",
+      "invitee": {
+        "id": "ANY",
+        "email": "dragon@gmail.com",
+        "username": "DragonSlayer"
+      }
+    }
+  ],
+  "received": [
+    {
+      "id": "ANY",
+      "created_at": "ANY",
+      "status": "pending",
+      "inviter": {
+        "id": "ANY",
+        "email": "jarek@gmail.com",
+        "username": "Jarek123"
+      }
+    }
+  ]
+}

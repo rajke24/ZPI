@@ -10,8 +10,8 @@ class ProfileController < ApplicationController
   end
 
   def validate_password
-    res = current_user.authenticate(params[:value]) != false
-    render json: res
+    is_valid = current_user.authenticate(params[:value]) != false
+    render json: is_valid
   end
 
   private

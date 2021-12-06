@@ -1,0 +1,11 @@
+[
+  {
+    "id": "ANY",
+    "status": "accepted",
+    "invitee": {
+      "id": "ANY",
+      "email": "dragon@gmail.com",
+      "username": "DragonSlayer"
+    }
+  }
+]

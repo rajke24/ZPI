@@ -1,0 +1,10 @@
+{
+  "id": "ANY",
+  "email": "jarek.andrzejewski@gmail.com",
+  "created_at": "ANY",
+  "activation_token": "TOKEN",
+  "activated": false,
+  "password_reset_token": null,
+  "password_reset_sent_at": null,
+  "username": "NoweKontoJarka"
+}

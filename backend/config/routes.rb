@@ -20,7 +20,7 @@ Rails.application.routes.draw do
         post 'find_message'
       end
     end
-    resources :invitations do
+    resources :invitations, except: [:show] do
       collection do
         get :check
         get :accepted

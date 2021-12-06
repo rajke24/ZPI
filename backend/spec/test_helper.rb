@@ -9,19 +9,18 @@ module TestHelper
     JSON.parse(@result)
   end
   
-  # May be used in the future
-  # def auth_as(user)
-  #   {
-  #     'Authorization': TestHelper.auth_token(user),
-  #     'Origin': TestHelper.test_origin
-  #   }
-  # end
-  #
-  # def self.auth_token(user)
-  #   'Bearer ' + Doorkeeper::AccessToken.create!(resource_owner_id: user.id).token
-  # end
-  #
-  # def self.test_origin
-  #   Rails.configuration.frontend_url
-  # end
+  def auth_as(user)
+    {
+      'Authorization': TestHelper.auth_token(user),
+      'Origin': TestHelper.test_origin
+    }
+  end
+
+  def self.auth_token(user)
+    'Bearer ' + Doorkeeper::AccessToken.create!(resource_owner_id: user.id).token
+  end
+
+  def self.test_origin
+    Rails.configuration.frontend_url
+  end
 end

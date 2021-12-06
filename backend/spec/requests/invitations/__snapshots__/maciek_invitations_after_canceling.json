@@ -1,0 +1,17 @@
+{
+  "sent": [
+    {
+      "id": "ANY",
+      "created_at": "ANY",
+      "status": "pending",
+      "invitee": {
+        "id": "ANY",
+        "email": "jarek@gmail.com",
+        "username": "Jarek123"
+      }
+    }
+  ],
+  "received": [
+
+  ]
+}
