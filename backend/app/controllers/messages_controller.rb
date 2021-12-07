@@ -3,8 +3,8 @@ class MessagesController < ApplicationController
   def get_invalid_devices(receiver_devices, messages)
     invalid_devices = []
 
-    actual_receiver_devices_ids = receiver_devices.collect { |d| [d.in_user_hierarchy_index] }
-    sent_receiver_devices_ids = messages.collect { |m| [m[:receiver_device_id]] }
+    actual_receiver_devices_ids = receiver_devices.collect { |d| d.in_user_hierarchy_index }
+    sent_receiver_devices_ids = messages.collect { |m| m[:receiver_device_id] }
 
     actual_receiver_devices_ids.each do |device|
       if (sent_receiver_devices_ids.include? device) == false
@@ -60,7 +60,7 @@ class MessagesController < ApplicationController
                                        message: {
                                          id: created_message.id,
                                          content: message[:content],
-                                         message_type: message[:message_type],
+                                         message_type: created_message[:message_type],
                                          sent_at: message[:sent_at],
                                          sender: {
                                            user_id: sender_device.user_id,
