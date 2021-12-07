@@ -13,6 +13,16 @@ export const get = (url, params, callback) => {
     );
 };
 
+export const get_image = (url, params, callback) => {
+    const config = {
+        url: url,
+        params
+    };
+    axios.request(config).then(
+        response => callback(response)
+    );
+};
+
 export const post = (url, data, callback) => {
     const config = {
         url,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_29_104144) do
+ActiveRecord::Schema.define(version: 2021_11_30_183245) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -101,6 +101,7 @@ ActiveRecord::Schema.define(version: 2021_11_29_104144) do
     t.datetime "password_reset_sent_at"
     t.string "otp_secret_key"
     t.string "username"
+    t.text "avatar_path"
   end
 
   add_foreign_key "devices", "users", on_delete: :cascade

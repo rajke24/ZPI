@@ -5,6 +5,7 @@
 #  id                     :bigint           not null, primary key
 #  activated              :boolean
 #  activation_token       :string
+#  avatar_path            :text
 #  email                  :string           not null
 #  otp_secret_key         :string
 #  password_digest        :string           not null

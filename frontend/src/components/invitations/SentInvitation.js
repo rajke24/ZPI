@@ -3,6 +3,19 @@ import './Invitation.scss';
 import Avatar from "../../common/avatar/Avatar";
 import {remove} from '../../shared/ApiClientBuilder';
 import {useSelector} from "react-redux";
+import db, {createConversation} from "../../storage/db";
+
+const get_invitee_avatar = async (invitation) => {
+    const needed_id = invitation.invitee.id
+    db.avatarData.get(needed_id).then(result => {
+        if(result === undefined) {
+            console.log("No avatar for this user");
+            return null
+        } else {
+            return result.avatar
+        }
+    });
+}
 
 const SentInvitation = ({invitation}) => {
     const [deleted, setDeleted] = useState(false);
@@ -22,7 +35,7 @@ const SentInvitation = ({invitation}) => {
     return (
         <div className='invitation'>
             <div className='left-side'>
-                <Avatar color='#000000' name='zaproszony'/>
+                <Avatar image={get_invitee_avatar(invitation)} color='#000000' name='zaproszony'/>
                 <p className='username'>{invitation.invitee.email}</p>
             </div>
             <div className='right-side'>

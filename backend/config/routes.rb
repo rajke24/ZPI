@@ -41,6 +41,8 @@ Rails.application.routes.draw do
     get 'profile', to: 'profile#show'
     get 'profile/validate_password', to: 'profile#validate_password'
     put '/profile', to: 'profile#update'
+    post 'documents', to: 'profile#update_avatar'
+    get 'get_avatar/:user_id', to: 'profile#get_avatar'
 
     post 'pre_keys_bundle', to: 'prekeys_bundle#save_prekeys_bundle'
     get 'pre_keys_bundle', to: 'prekeys_bundle#send_prekeys_bundle_info'

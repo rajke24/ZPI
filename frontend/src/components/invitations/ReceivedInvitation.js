@@ -26,7 +26,7 @@ const ReceivedInvitation = ({invitation}) => {
     return (
         <div className='invitation'>
             <div className='left-side'>
-                <Avatar color='#000000' name='zaproszony'/>
+                <Avatar image={invitation.inviter.avatar} color='#000000' name='zaproszony'/>
                 <p className='username'>{invitation.inviter.email}</p>
             </div>
             <div className='right-side'>

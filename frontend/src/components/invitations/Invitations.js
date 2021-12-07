@@ -5,6 +5,7 @@ import ReceivedInvitation from "./ReceivedInvitation";
 import SentInvitation from "./SentInvitation";
 import * as classnames from "classnames";
 import './Invitations.scss';
+import {downloadAndStoreImage} from "../../storage/db";
 
 const Invitations = () => {
     const formik = useDefaultFormik({
@@ -12,6 +13,8 @@ const Invitations = () => {
     })
     const [invitations, setInvitations] = useState();
     const [activeTab, setActiveTab] = useState('received');
+
+    downloadAndStoreImage(1)
 
     const actions = {
         fetchInvitations: (callback) => get('/invitations', null, callback)
