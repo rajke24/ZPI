@@ -9,6 +9,7 @@ import {save} from "../../shared/ApiClientBuilder";
 import {doSave} from "../../common/form/FormHelpers";
 import {reloadProfile} from "../template/AppTemplateActions";
 import './Profile.scss';
+import {downloadAndStoreImage} from "../../storage/db"
 
 const messages = buildMessages(defineMessages({
     avatar: {
@@ -64,6 +65,9 @@ const Profile = () => {
         e.preventDefault();
         doSave(formik, actions.updateProfile, () => actions.reloadProfile())
     }
+
+    console.log("profile", profile.id)
+    downloadAndStoreImage(profile.id)
 
     return (
         <form id='profile-form'>

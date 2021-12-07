@@ -83,7 +83,7 @@ const Chat = () => {
             <Conversations />
             {conversation && <div className='chat-window'>
                 <div className='chat-header'>
-                    <Avatar name={conversation.receiver.username} color='#1181A5'/>
+                    <Avatar name={conversation.receiver.username} color='#1181A5' avatar_id={"chat_with_" + conversation.receiver.id} user_id={conversation.receiver.id}/>
                     <div className='friend-info'>
                         <span className='name'>{conversation.receiver.username}</span>
                         <span className='status'>Online</span>

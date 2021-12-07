@@ -3,24 +3,15 @@ import './Invitation.scss';
 import Avatar from "../../common/avatar/Avatar";
 import {remove} from '../../shared/ApiClientBuilder';
 import {useSelector} from "react-redux";
-import db, {createConversation} from "../../storage/db";
+import {downloadAndStoreImage} from "../../storage/db";
 
-const get_invitee_avatar = async (invitation) => {
-    const needed_id = invitation.invitee.id
-    db.avatarData.get(needed_id).then(result => {
-        if(result === undefined) {
-            console.log("No avatar for this user");
-            return null
-        } else {
-            return result.avatar
-        }
-    });
-}
 
 const SentInvitation = ({invitation}) => {
     const [deleted, setDeleted] = useState(false);
     const isPendingInvitation = invitation.status === 'pending'
     const profile = useSelector(state => state.persistentState.profile)
+
+    downloadAndStoreImage(invitation.invitee.id)
 
     const actions = {
         deleteInvitation: (callback) => remove(`/invitations/${invitation.id}`, callback)
@@ -35,7 +26,7 @@ const SentInvitation = ({invitation}) => {
     return (
         <div className='invitation'>
             <div className='left-side'>
-                <Avatar image={get_invitee_avatar(invitation)} color='#000000' name='zaproszony'/>
+                <Avatar color='#000000' name='zaproszony' avatar_id={"zaproszenie_od_" + invitation.invitee.id} user_id={invitation.invitee.id}/>
                 <p className='username'>{invitation.invitee.email}</p>
             </div>
             <div className='right-side'>

@@ -14,8 +14,6 @@ const Invitations = () => {
     const [invitations, setInvitations] = useState();
     const [activeTab, setActiveTab] = useState('received');
 
-    downloadAndStoreImage(1)
-
     const actions = {
         fetchInvitations: (callback) => get('/invitations', null, callback)
     }

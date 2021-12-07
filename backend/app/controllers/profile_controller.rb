@@ -30,22 +30,18 @@ class ProfileController < ApplicationController
   end
 
   def get_avatar
-    p params
     requested_id = params["user_id"]
-    p requested_id
     user = User.find_by(id: requested_id)
-    p "outside"
     if user&.avatar_path
-      p user.avatar_path
-      p "inside"
       file_ext = File.extname(user.avatar_path)[1..-1]
+
+      # image/jpeg is for both .jpg and .jpeg
       if file_ext == "jpg"
         file_ext = "jpeg"
       end
-      # image/#{file_ext}
+
       File.open(user.avatar_path, 'rb') do |f|
         read_file = f.read
-        # p read_file
         encoded = Base64.strict_encode64(read_file)
         response_data = "data:image/#{file_ext};base64,#{encoded}"
         send_data response_data, :type => "application/octet-stream", :disposition => "inline"

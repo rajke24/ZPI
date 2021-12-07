@@ -14,6 +14,7 @@ const Conversations = () => {
 
     const conversations = useLiveQuery(() => db.conversations.where({sender_id: profile.id}).filter(c => c.name.includes(searchQuery)).toArray(), [searchQuery])?.map(c => ({
         name: c.name,
+        user_id: c.receiver.id,
         lastMessage: c.messages[c.messages.length - 1],
         id: c.id
     }));
@@ -27,7 +28,7 @@ const Conversations = () => {
         <div className='conversations'>
             <input className='search-input' value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                    placeholder='Search...'/>
-            {conversations && conversations.map(({id, name, lastMessage}) => <Conversation key={id} name={name}
+            {conversations && conversations.map(({id, name, lastMessage, user_id}) => <Conversation key={id} name={name} user_id={user_id}
                                                                                            lastMessage={lastMessage}/>)}
         </div>
     );

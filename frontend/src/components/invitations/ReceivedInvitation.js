@@ -3,11 +3,13 @@ import './Invitation.scss';
 import Avatar from "../../common/avatar/Avatar";
 import {remove, save} from "../../shared/ApiClientBuilder";
 import {useSelector} from "react-redux";
-import {createConversation} from "../../storage/db";
+import {createConversation, downloadAndStoreImage} from "../../storage/db";
 
 const ReceivedInvitation = ({invitation}) => {
     const [invitationStatus, setInvitationStatus] = useState();
     const profile = useSelector(state => state.persistentState.profile);
+
+    downloadAndStoreImage(invitation.inviter.id)
 
     const actions = {
         manageInvitation: (data, callback) => save(`/invitations/${invitation.id}`, 'PUT', data, callback)
@@ -26,7 +28,7 @@ const ReceivedInvitation = ({invitation}) => {
     return (
         <div className='invitation'>
             <div className='left-side'>
-                <Avatar image={invitation.inviter.avatar} color='#000000' name='zaproszony'/>
+                <Avatar color='#000000' name='zaproszony' avatar_id={"zaproszenie_od_" + invitation.inviter.id} user_id={invitation.inviter.id}/>
                 <p className='username'>{invitation.inviter.email}</p>
             </div>
             <div className='right-side'>

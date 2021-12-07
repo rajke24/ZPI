@@ -12,6 +12,8 @@ import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import {getCroppedImg} from "../utils";
 import Modal from "../modal/Modal";
+import {useSelector} from "react-redux";
+
 
 const messages = buildMessages(defineMessages({
     tapHere: {
@@ -29,6 +31,7 @@ const FormAvatar = ({value, label, name, crop, onChange}) => {
     const [cropImage, setCropImage] = useState(null)
     const [cropAspect, setCropAspect] = useState({width: 350, height: 350, aspect: 1});
     const [croppedImageElement, setCroppedImageElement] = useState(null)
+    const profile = useSelector(state => state.persistentState.profile);
 
     const {formatMessage} = useIntl();
 
@@ -65,7 +68,7 @@ const FormAvatar = ({value, label, name, crop, onChange}) => {
         <div {...getRootProps()}
              className={classnames("avatar-dropzone", {'active': isDragActive})}>
             <input {...getInputProps()} />
-            {value ? <Avatar big url={value.small_url}/> : <div className="empty-avatar">
+            {value ? <Avatar big url={value.small_url} avatar_id={"drop_zone_avatar_" + profile.id} user_id={profile.id}/> : <div className="empty-avatar">
                 <b>{formatMessage(messages.tapHere)}</b>
                 <div>{formatMessage(messages.toUpload, {object: label && formatMessage(label)})}</div>
             </div>

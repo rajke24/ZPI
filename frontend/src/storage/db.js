@@ -31,15 +31,17 @@ export const createConversation = async (sender, receiver, messages=[]) => {
 
 export const downloadAndStoreImage = async function (user_id) {
     get_image("get_avatar/" + user_id, {}, (response) => {
-        db.avatarData.put(
-            {user_id: user_id, avatar: response.data},
-            [user_id]
-        ).then(function (updated) {
-            if (updated)
-                console.log ("Avatar updated of: " + user_id);
-            else
-                console.log ("Image not updated");
-        });
+        if (response.status === 200) {
+            db.avatarData.put(
+                {user_id: user_id, avatar: response.data},
+                [user_id]
+            ).then(function (updated) {
+                if (updated)
+                    console.log("Avatar updated of: " + user_id);
+                else
+                    console.log("Image not updated");
+            });
+        }
     })
 }
 
