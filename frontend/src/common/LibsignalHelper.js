@@ -185,7 +185,7 @@ function getDecryptionMethod(ciphertext, senderId, senderDeviceId, protocolStore
 
     if(ciphertext.type === 3) {
         return sessionCipher.decryptPreKeyWhisperMessage;
-    } else if(ciphertext.type === 1) {
+    } else if(ciphertext.type === 1 || ciphertext.type === 2) {
         return sessionCipher.decryptWhisperMessage;
     } else {
         console.error("Unknown ciphertext type! Type: " + ciphertext.type);
@@ -263,7 +263,7 @@ function encryptMessage(protocolStore, sender, receiver, message, receiver_devic
         let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id, receiver_device_id);
         let sessionCipher = new window.libsignal.SessionCipher(protocolStore, receiverAddress);
         sessionCipher.encrypt(message).then(ciphertext => {
-            resolve({ device_id: receiver_device_id[0], ciphertext: ciphertext });
+            resolve({ device_id: receiver_device_id, ciphertext: ciphertext });
         });
     });
 }
