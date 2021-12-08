@@ -76,7 +76,7 @@ class MessagesController < ApplicationController
       render json: { status: :ok, message_id: created_message.id }
     else
       invalid_devices_response = get_invalid_devices_response(receiver_devices, invalid_devices)
-      render json: { status: 202, invalid_devices: invalid_devices_response }
+      render json: { status: 202, invalid_devices: invalid_devices_response }, status: 202
     end
   end
 
