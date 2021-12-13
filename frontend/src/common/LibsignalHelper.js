@@ -30,19 +30,14 @@ LibsignalHelper.ensureIdentityKeys = function(protocol_store, myId) {
 function createUserKeys() {
     return new Promise((resolve, reject) => {
         window.libsignal.KeyHelper.generateIdentityKeyPair().then(myIdentityKeyPair => {
-            window.libsignal.KeyHelper.generatePreKey(1).then(myPreKey => {
-                window.libsignal.KeyHelper.generatePreKey(2).then(myPreKey2 => {
-                    window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
-                        const registrationId = 1; //TODO
-                        resolve({
-                            registrationId: registrationId,
-                            identityKeyPair: myIdentityKeyPair,
-                            preKeys: [
-                                myPreKey,
-                                myPreKey2
-                            ],
-                            signedPreKey: mySignedPreKey
-                        });
+            createPreKeys(100).then(myPrekeys => {
+                window.libsignal.KeyHelper.generateSignedPreKey(myIdentityKeyPair, 100).then(mySignedPreKey => {
+                    const registrationId = 1; //TODO
+                    resolve({
+                        registrationId: registrationId,
+                        identityKeyPair: myIdentityKeyPair,
+                        preKeys: myPrekeys,
+                        signedPreKey: mySignedPreKey
                     });
                 });
             });
@@ -50,35 +45,53 @@ function createUserKeys() {
     });
 }
 
+function createPreKeys(number) {
+    return new Promise((resolve, reject) => {
+        let indexes = new Array(number)
+        for(let i = 0; i < number; i++) {
+            indexes[i] = i + 1
+        }
+        Promise.all(indexes.map(index => window.libsignal.KeyHelper.generatePreKey(index))).then(prekeys => {
+            resolve(prekeys)
+        })
+    })
+}
+
+
 function storeUserKeys(protocolStore, generatedUserKeys) {
     return new Promise((resolve, reject) => {
         console.log("Storing identity keys!");
         protocolStore.setIdentityKeyPair(generatedUserKeys.identityKeyPair);
         protocolStore.setLocalRegistrationId(generatedUserKeys.registrationId);
-        protocolStore.storePreKey(generatedUserKeys.preKeys[0].keyId, generatedUserKeys.preKeys[0]).then(() => {
-            protocolStore.storePreKey(generatedUserKeys.preKeys[1].keyId, generatedUserKeys.preKeys[1]).then(() => {
-                protocolStore.storeSignedPreKey(generatedUserKeys.signedPreKey.keyId, generatedUserKeys.signedPreKey).then(() => {
-                    resolve(generatedUserKeys);
-                });
+        storePreKeys(protocolStore, generatedUserKeys.preKeys).then(() => {
+            protocolStore.storeSignedPreKey(generatedUserKeys.signedPreKey.keyId, generatedUserKeys.signedPreKey).then(() => {
+                resolve(generatedUserKeys);
             });
         });
     });
 }
 
+function storePreKeys(protocolStore, prekeys) {
+    return new Promise((resolve, reject) => {
+        Promise.all(prekeys.map(prekey => protocolStore.storePreKey(prekey.keyId, prekey))).then(() => {
+            resolve()
+        })
+    })
+}
+
+
 function sendUserKeysToServer(protocolStore, generatedUserKeys) {
     return new Promise((resolve, reject) => {
+        let prekeys = new Array(generatedUserKeys.preKeys.length)
+        for(let i = 0; i < generatedUserKeys.preKeys.length; i++) {
+            prekeys[i] = {
+                keyId: generatedUserKeys.preKeys[i].keyId,
+                publicKey: arraybuffer_to_string(generatedUserKeys.preKeys[i].keyPair.pubKey)
+            }
+        }
         let prekey_bundle_data = {
             identityKey: arraybuffer_to_string(generatedUserKeys.identityKeyPair.pubKey),
-            preKeys: [
-                {
-                    keyId: generatedUserKeys.preKeys[0].keyId,
-                    publicKey: arraybuffer_to_string(generatedUserKeys.preKeys[0].keyPair.pubKey)
-                },
-                {
-                    keyId: generatedUserKeys.preKeys[1].keyId,
-                    publicKey: arraybuffer_to_string(generatedUserKeys.preKeys[1].keyPair.pubKey)
-                }
-            ],
+            preKeys: prekeys,
             signedPreKey: {
                 keyId: generatedUserKeys.signedPreKey.keyId,
                 publicKey: arraybuffer_to_string(generatedUserKeys.signedPreKey.keyPair.pubKey),
