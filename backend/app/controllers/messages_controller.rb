@@ -20,7 +20,7 @@ class MessagesController < ApplicationController
     return invalid_devices
   end
 
-  def get_invalid_devices_response(receiver_devices, invalid_devices)
+  def get_invalid_devices_response(user_id, receiver_devices, invalid_devices)
     response = []
     invalid_devices.each do |invalid_device|
       if invalid_device[:reason] == :missing
@@ -33,6 +33,9 @@ class MessagesController < ApplicationController
                           prekey: device_info.prekeys[0]
                         }
                       })
+        device_to_remove = Device.where(user_id: user_id, in_user_hierarchy_index: invalid_device[:device_index]).last
+        device_to_remove.prekeys.delete_at(0)
+        device_to_remove.save
       else
         response.push({ device_id: invalid_device[:device_index] })
       end
@@ -75,7 +78,7 @@ class MessagesController < ApplicationController
       end
       render json: { status: :ok, message_id: created_message.id }
     else
-      invalid_devices_response = get_invalid_devices_response(receiver_devices, invalid_devices)
+      invalid_devices_response = get_invalid_devices_response(message_params[:receiver_user_id], receiver_devices, invalid_devices)
       render json: { status: 202, invalid_devices: invalid_devices_response }, status: 202
     end
   end
