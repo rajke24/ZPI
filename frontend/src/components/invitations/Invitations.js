@@ -22,8 +22,8 @@ const Invitations = () => {
     return (
         <div className='invitations'>
             <div className='tabs'>
-                <button className={classnames('tab', {active: activeTab === 'received'})} onClick={() => setActiveTab('received')}>Received</button>
-                <button className={classnames('tab', {active: activeTab === 'sent'})} onClick={() => setActiveTab('sent')}>Sent</button>
+                <button id='receivedTab' className={classnames('tab', {active: activeTab === 'received'})} onClick={() => setActiveTab('received')}>Received</button>
+                <button id='sentTab' className={classnames('tab', {active: activeTab === 'sent'})} onClick={() => setActiveTab('sent')}>Sent</button>
             </div>
             {invitations && <div>
                 {activeTab === 'received' ?

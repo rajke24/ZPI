@@ -9,7 +9,7 @@ const Message = ({message}) => {
     return (
         <div className={`message-wrapper ${message_type}`}>
             <div className='message'>
-                <span>{message.content}</span>
+                <span id='messageContent'>{message.content}</span>
             </div>
         </div>
     );

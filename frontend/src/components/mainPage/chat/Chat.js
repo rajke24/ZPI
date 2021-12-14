@@ -93,9 +93,9 @@ const Chat = () => {
                     {conversation?.messages.map((message) => <Message message={message}/>)}
                 </div>
                 <div className='chat-input'>
-                    <input onKeyPress={e => onEnterPress(e)} value={currentMessage}
+                    <input id="chatInput" onKeyPress={e => onEnterPress(e)} value={currentMessage}
                            onChange={e => setCurrentMessage(e.target.value)} placeholder='Type a new message...'/>
-                    <button disabled={!currentMessage} onClick={actions.sendMessage}>
+                    <button id="sendMessage" disabled={!currentMessage} onClick={actions.sendMessage}>
                         Send
                         <Icon icon={sendIcon}/>
                     </button>

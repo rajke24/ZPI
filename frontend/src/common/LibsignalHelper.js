@@ -109,22 +109,6 @@ function sendUserKeysToServer(protocolStore, generatedUserKeys) {
     });
 }
 
-function ensureSession(protocolStore, receiver) {
-    return new Promise((resolve, reject) => {
-        protocolStore.loadSession(receiver.id).then(session => {
-            if(session === undefined) {
-                console.log("No session! Creating new one...")
-                createSession(protocolStore, receiver).then(() => {
-                    resolve();
-                });
-            } else {
-                console.log("Session OK");
-                resolve();
-            }
-        });
-    });
-}
-
 function ensureConversation(profileId, otherUserId, receiver_email) {
     return new Promise((resolve, reject) => {
         db.conversations.get({sender_id: profileId, 'receiver.id': otherUserId}).then(result => {
@@ -193,7 +177,7 @@ function decryptMessage(protocolStore, message) {
 }
 
 function getDecryptionMethod(ciphertext, senderId, senderDeviceId, protocolStore) {
-    const senderAddress = new window.libsignal.SignalProtocolAddress(senderId.toString(), senderDeviceId);
+    const senderAddress = new window.libsignal.SignalProtocolAddress(senderId.toString() + "." + senderDeviceId, senderDeviceId);
     const sessionCipher = new window.libsignal.SessionCipher(protocolStore, senderAddress);
 
     if(ciphertext.type === 3) {
@@ -273,7 +257,7 @@ function encryptAllMessagesRepeat(protocolStore, sender, receiver, message, know
 
 function encryptMessage(protocolStore, sender, receiver, message, receiver_device_id) {
     return new Promise((resolve, reject) => {
-        let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id, receiver_device_id);
+        let receiverAddress = new window.libsignal.SignalProtocolAddress(receiver.user_id + "." + receiver_device_id, receiver_device_id);
         let sessionCipher = new window.libsignal.SessionCipher(protocolStore, receiverAddress);
         sessionCipher.encrypt(message).then(ciphertext => {
             resolve({ device_id: receiver_device_id, ciphertext: ciphertext });
@@ -337,7 +321,7 @@ function createSession(otherUserId, protocolStore, deviceToAdd) {
                 signature: string_to_arraybuffer(deviceToAdd.prekey_bundle.signed_key.signature)
             }
         };
-        let receiverAddress = new window.libsignal.SignalProtocolAddress(otherUserId, deviceToAdd.device_id);
+        let receiverAddress = new window.libsignal.SignalProtocolAddress(otherUserId + "." + deviceToAdd.device_id, deviceToAdd.device_id);
         let sessionBuilder = new window.libsignal.SessionBuilder(protocolStore, receiverAddress);
         sessionBuilder.processPreKey(preKeyBundle).then(() => {
             console.log("New session created!");
